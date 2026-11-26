@@ -1,8 +1,8 @@
-@extends('layouts.app')
+@extends('layouts.app', ['hideSidebar' => true])
 
 @section('title')
     <h1 class="page-title">All Festivals</h1>
-    <p class="page-subtitle">Discover and filter amazing festivals</p>
+    <p class="page-subtitle">Discover amazing festivals happening near you</p>
 @endsection
 
 @section('header-actions')
@@ -17,128 +17,176 @@
 @endsection
 
 @section('content')
-    <!-- Filter Bar -->
-    <div class="card mb-6 animate-in">
-        <div class="card-body">
-            <form method="GET" action="{{ route('events.index') }}" class="space-y-4 md:space-y-0 md:flex md:items-end md:gap-4">
-                <!-- Search -->
-                <div class="md:flex-1">
-                    <label for="search" class="sr-only">Search festivals</label>
-                    <div class="relative">
-                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <input type="text"
-                               id="search"
-                               name="search"
-                               value="{{ request('search') }}"
-                               placeholder="Search festivals, artists, locations..."
-                               class="input pl-10 pr-4"
-                               autocomplete="off">
-                    </div>
-                </div>
+    <!-- Hero / Search Section -->
+    <section class="relative mb-10 animate-in bg-gradient-to-br from-primary-50 via-white to-pink-50 rounded-2xl p-6 sm:p-10 lg:p-14">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%233b82f6" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 
-                <!-- Category Filter -->
-                <div class="md:w-48">
-                    <label for="category" class="sr-only">Category</label>
-                    <select id="category" name="category" class="input appearance-none bg-white">
-                        <option value="">All Categories</option>
-                        @foreach([
-                            'music' => 'Music Festivals',
-                            'electronic' => 'EDM & Electronic',
-                            'rock' => 'Rock & Indie',
-                            'cultural' => 'Cultural & Arts',
-                            'food' => 'Food & Drink',
-                            'comedy' => 'Comedy & Shows',
-                            'wellness' => 'Wellness & Yoga',
-                            'family' => 'Family & Kids',
-                        ] as $key => $label)
-                            <option value="{{ $key }}" {{ request('category') === $key ? 'selected' : '' }}>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
+        <div class="relative max-w-3xl mx-auto text-center">
+            <h2 class="text-2xl sm:text-3xl font-bold text-secondary-900 mb-3">Find Your Next Festival</h2>
+            <p class="text-secondary-600 mb-6">Search by name, artist, or location</p>
 
-                <!-- Location Filter -->
-                <div class="md:w-48">
-                    <label for="location" class="sr-only">Location</label>
-                    <select id="location" name="location" class="input appearance-none bg-white">
-                        <option value="">All Locations</option>
-                        <option value="jakarta" {{ request('location') === 'jakarta' ? 'selected' : '' }}>Jakarta</option>
-                        <option value="bali" {{ request('location') === 'bali' ? 'selected' : '' }}>Bali</option>
-                        <option value="bandung" {{ request('location') === 'bandung' ? 'selected' : '' }}>Bandung</option>
-                        <option value="surabaya" {{ request('location') === 'surabaya' ? 'selected' : '' }}>Surabaya</option>
-                        <option value="yogyakarta" {{ request('location') === 'yogyakarta' ? 'selected' : '' }}>Yogyakarta</option>
-                    </select>
-                </div>
-
-                <!-- Date Filter -->
-                <div class="md:w-40">
-                    <label for="date_filter" class="sr-only">Date</label>
-                    <select id="date_filter" name="date_filter" class="input appearance-none bg-white">
-                        <option value="">All Dates</option>
-                        <option value="upcoming" {{ request('date_filter') === 'upcoming' ? 'selected' : '' }}>Upcoming</option>
-                        <option value="this_week" {{ request('date_filter') === 'this_week' ? 'selected' : '' }}>This Week</option>
-                        <option value="this_month" {{ request('date_filter') === 'this_month' ? 'selected' : '' }}>This Month</option>
-                    </select>
-                </div>
-
-                <!-- Sort -->
-                <div class="md:w-40">
-                    <label for="sort" class="sr-only">Sort</label>
-                    <select id="sort" name="sort" class="input appearance-none bg-white">
-                        <option value="date_asc" {{ request('sort') === 'date_asc' ? 'selected' : '' }}>Date: Soonest</option>
-                        <option value="date_desc" {{ request('sort') === 'date_desc' ? 'selected' : '' }}>Date: Latest</option>
-                        <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>Most Popular</option>
-                        <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>Newest Added</option>
-                    </select>
-                </div>
-
-                <!-- Submit/Clear -->
-                <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary whitespace-nowrap">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                        </svg>
-                        Filter
-                    </button>
-                    @if(request()->hasAny(['search', 'category', 'location', 'date_filter', 'sort']))
-                        <a href="{{ route('events.index') }}" class="btn btn-outline whitespace-nowrap">Clear</a>
+            <form method="GET" action="{{ route('events.index') }}" class="relative max-w-xl mx-auto">
+                <div class="relative">
+                    <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text"
+                           name="search"
+                           value="{{ request('search') }}"
+                           placeholder="Search festivals, artists, locations..."
+                           class="input pl-12 pr-4 py-3 text-lg w-full"
+                           autocomplete="off">
+                    @if(request('search'))
+                        <a href="{{ route('events.index') }}" class="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600" aria-label="Clear search">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
                     @endif
                 </div>
             </form>
         </div>
-    </div>
+    </section>
+
+    <!-- Category Pills -->
+    <section class="mb-8 animate-in" style="animation-delay: 0.1s;">
+        <div class="flex flex-wrap gap-3" role="group" aria-label="Festival categories">
+            <a href="{{ route('events.index') }}"
+               class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ !request('category') ? 'bg-primary-600 text-white shadow-lg' : 'bg-white text-secondary-600 border border-secondary-200 hover:border-primary-300 hover:text-primary-600' }}">
+                All Festivals
+            </a>
+
+            @php
+                $categories = [
+                    ['key' => 'music', 'label' => 'Music Festivals', 'color' => 'primary'],
+                    ['key' => 'electronic', 'label' => 'EDM & Electronic', 'color' => 'pink'],
+                    ['key' => 'rock', 'label' => 'Rock & Indie', 'color' => 'orange'],
+                    ['key' => 'cultural', 'label' => 'Cultural & Arts', 'color' => 'purple'],
+                    ['key' => 'food', 'label' => 'Food & Drink', 'color' => 'amber'],
+                    ['key' => 'comedy', 'label' => 'Comedy & Shows', 'color' => 'rose'],
+                    ['key' => 'wellness', 'label' => 'Wellness & Yoga', 'color' => 'emerald'],
+                    ['key' => 'family', 'label' => 'Family & Kids', 'color' => 'blue'],
+                ];
+            @endphp
+
+            @foreach($categories as $cat)
+                <a href="{{ route('events.index', ['category' => $cat['key']]) }}"
+                   class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request('category') === $cat['key'] ? 'bg-'.$cat['color'].'-600 text-white shadow-lg' : 'bg-white text-secondary-600 border border-secondary-200 hover:border-'.$cat['color'].'-300 hover:text-'.$cat['color'].'-600' }}">
+                    {{ $cat['label'] }}
+                </a>
+            @endforeach
+        </div>
+    </section>
+
+    <!-- Quick Filters Row -->
+    @if(request()->hasAny(['location', 'date_filter', 'sort']))
+        <div class="flex flex-wrap items-center gap-2 mb-6 animate-in" style="animation-delay: 0.15s;" id="active-filters">
+            <span class="text-sm text-secondary-500">Active filters:</span>
+            
+            @if(request('location'))
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-100 text-secondary-700 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z" />
+                    </svg>
+                    {{ ucfirst(request('location')) }}
+                    <a href="{{ route('events.index', array_merge(request()->except('location'), ['location' => ''])) }}" class="text-secondary-500 hover:text-secondary-700" aria-label="Remove location filter">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </a>
+                </span>
+            @endif
+
+            @if(request('date_filter'))
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-100 text-secondary-700 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ ucfirst(str_replace('_', ' ', request('date_filter'))) }}
+                    <a href="{{ route('events.index', array_merge(request()->except('date_filter'), ['date_filter' => ''])) }}" class="text-secondary-500 hover:text-secondary-700" aria-label="Remove date filter">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </a>
+                </span>
+            @endif
+
+            @if(request('sort') && request('sort') !== 'date_asc')
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-100 text-secondary-700 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    {{ ucfirst(str_replace('_', ' ', request('sort'))) }}
+                    <a href="{{ route('events.index', array_merge(request()->except('sort'), ['sort' => ''])) }}" class="text-secondary-500 hover:text-secondary-700" aria-label="Remove sort filter">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </a>
+                </span>
+            @endif
+
+            <a href="{{ route('events.index') }}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                Clear all
+            </a>
+        </div>
+    @endif
 
     <!-- Results Info -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 animate-in" style="animation-delay: 0.1s;">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6 animate-in" style="animation-delay: 0.2s;">
         <div class="flex items-center gap-3 text-sm text-secondary-600">
-            <span>{{ $events->total() }} festivals found</span>
+            <span>{{ $events->total() }} {{ $events->total() === 1 ? 'festival' : 'festivals' }} found</span>
             @if(request('category'))
-                <span class="badge badge-primary">{{ ucfirst(request('category')) }}</span>
-            @endif
-            @if(request('location'))
-                <span class="badge badge-outline">{{ ucfirst(request('location')) }}</span>
+                <span class="px-2.5 py-1 rounded-full bg-primary-100 text-primary-700 text-xs font-medium">{{ ucfirst(request('category')) }}</span>
             @endif
         </div>
+
         <div class="flex items-center gap-2">
-            <label for="view_mode" class="sr-only">View mode</label>
-            <select id="view_mode" class="input appearance-none bg-white w-auto" onchange="changeView(this.value)">
-                <option value="grid" {{ !request('view') || request('view') === 'grid' ? 'selected' : '' }}>Grid</option>
-                <option value="list" {{ request('view') === 'list' ? 'selected' : '' }}>List</option>
-            </select>
+            <!-- View Toggle -->
+            <div class="flex bg-secondary-100 rounded-lg p-1" role="group" aria-label="View mode">
+                <a href="{{ route('events.index', array_merge(request()->except('view'), ['view' => 'grid'])) }}"
+                   class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {{ (!request('view') || request('view') === 'grid') ? 'bg-white text-secondary-900 shadow' : 'text-secondary-500 hover:text-secondary-700' }}"
+                   aria-label="Grid view"
+                   aria-pressed="{{ (!request('view') || request('view') === 'grid') ? 'true' : 'false' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                </a>
+                <a href="{{ route('events.index', array_merge(request()->except('view'), ['view' => 'list'])) }}"
+                   class="px-3 py-1.5 rounded-md text-sm font-medium transition-colors {{ request('view') === 'list' ? 'bg-white text-secondary-900 shadow' : 'text-secondary-500 hover:text-secondary-700' }}"
+                   aria-label="List view"
+                   aria-pressed="{{ request('view') === 'list' ? 'true' : 'false' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Sort Dropdown -->
+            <form method="GET" action="{{ route('events.index') }}" class="flex items-center gap-2">
+                @foreach(request()->except(['sort', 'view']) as $key => $value)
+                    <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
+                <select name="sort" onchange="this.form.submit()" class="input appearance-none bg-white w-auto pr-10" aria-label="Sort festivals">
+                    <option value="date_asc" {{ request('sort') === 'date_asc' ? 'selected' : '' }}>Date: Soonest</option>
+                    <option value="date_desc" {{ request('sort') === 'date_desc' ? 'selected' : '' }}>Date: Latest</option>
+                    <option value="popular" {{ request('sort') === 'popular' ? 'selected' : '' }}>Most Popular</option>
+                    <option value="newest" {{ request('sort') === 'newest' ? 'selected' : '' }}>Newest Added</option>
+                </select>
+            </form>
         </div>
     </div>
 
     @if($events->isEmpty())
-        <div class="card animate-in">
+        <div class="card animate-in py-16 sm:py-24">
             <div class="empty-state">
                 <div class="empty-state-icon">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <h2 class="empty-state-title">No festivals found</h2>
-                <p class="empty-state-description">Try adjusting your filters or search terms.</p>
+                <p class="empty-state-description">Try adjusting your search or filters.</p>
                 <div class="empty-state-action">
                     <a href="{{ route('events.index') }}" class="btn btn-primary">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -150,15 +198,17 @@
             </div>
         </div>
     @else
-        <div id="events-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in" style="animation-delay: 0.2s;">
+        <!-- Grid View -->
+        <div id="events-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in {{ request('view') === 'list' ? 'hidden' : '' }}" style="animation-delay: 0.3s;">
             @foreach($events as $event)
-                <article class="card group overflow-hidden h-full flex flex-col">
-                    <!-- Event Image -->
+                <article class="card festival-card group overflow-hidden h-full flex flex-col animate-in"
+                         style="animation-delay: {{ $loop->index * 30 + 100 }}ms;">
+                    <!-- Festival Image -->
                     <div class="relative aspect-video overflow-hidden bg-secondary-100">
                         @if($event->image)
                             <img src="{{ asset('storage/' . $event->image) }}"
                                  alt="{{ $event->title }}"
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-pink-500">
                                 <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -167,6 +217,7 @@
                             </div>
                         @endif
 
+                        <!-- Badges -->
                         <div class="absolute top-3 left-3 right-3 flex flex-wrap gap-2">
                             <span class="badge bg-primary-600 text-white">{{ $event->category ?? 'Music Festival' }}</span>
                             <span class="badge
@@ -176,7 +227,8 @@
                                 {{ ucfirst($event->status) }}
                             </span>
                             @php
-                                $isSoldOut = $event->max_attendees && ($event->registrations_count ?? $event->registrations()->where('status', '!=', 'cancelled')->count()) >= $event->max_attendees;
+                                $registrationsCount = $event->registrations_count ?? $event->registrations()->where('status', '!=', 'cancelled')->count();
+                                $isSoldOut = $event->max_attendees && $registrationsCount >= $event->max_attendees;
                             @endphp
                             @if($isSoldOut)
                                 <span class="badge badge-danger">Sold Out</span>
@@ -195,7 +247,7 @@
                         @endif
                     </div>
 
-                    <!-- Event Content -->
+                    <!-- Festival Content -->
                     <div class="card-body flex flex-col flex-1">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="badge badge-outline text-xs">{{ $event->city ?? 'Jakarta' }}</span>
@@ -236,7 +288,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                                     </svg>
                                     <span>
-                                        {{ $event->registrations_count ?? $event->registrations()->where('status', '!=', 'cancelled')->count() }} / {{ $event->max_attendees }}
+                                        {{ $registrationsCount }} / {{ $event->max_attendees }}
                                     </span>
                                 </div>
                             @endif
@@ -334,15 +386,15 @@
             @endforeach
         </div>
 
-        <!-- List View (Hidden by default) -->
-        <div id="events-list" class="hidden space-y-4 animate-in" style="animation-delay: 0.2s;">
+        <!-- List View -->
+        <div id="events-list" class="hidden space-y-4 animate-in {{ request('view') === 'list' ? '' : 'hidden' }}" style="animation-delay: 0.3s;">
             @foreach($events as $event)
-                <article class="card group flex">
+                <article class="card festival-card group flex">
                     <div class="relative w-full sm:w-64 lg:w-72 flex-shrink-0 aspect-video overflow-hidden bg-secondary-100">
                         @if($event->image)
                             <img src="{{ asset('storage/' . $event->image) }}"
                                  alt="{{ $event->title }}"
-                                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-pink-500">
                                 <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -434,9 +486,8 @@
 
     <!-- Pagination -->
     @if($events->hasPages())
-        <nav class="mt-8 flex justify-center" aria-label="Pagination">
+        <nav class="mt-10 flex justify-center" aria-label="Pagination">
             <div class="pagination">
-                {{-- Previous --}}
                 @if($events->onFirstPage())
                     <span class="pagination-link opacity-50 cursor-not-allowed" aria-disabled="true">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -451,7 +502,6 @@
                     </a>
                 @endif
 
-                {{-- Page Numbers --}}
                 @foreach($elements = $events->getUrlRange(1, $events->lastPage()) as $page => $url)
                     @if($page === '...')
                         <span class="pagination-ellipsis" aria-hidden="true">...</span>
@@ -462,7 +512,6 @@
                     @endif
                 @endforeach
 
-                {{-- Next --}}
                 @if($events->onLastPage())
                     <span class="pagination-link opacity-50 cursor-not-allowed" aria-disabled="true">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -499,7 +548,6 @@
             }
         }
 
-        // Initialize view on load
         document.addEventListener('DOMContentLoaded', () => {
             const viewMode = '{{ request('view', 'grid') }}';
             if (viewMode === 'list') {
