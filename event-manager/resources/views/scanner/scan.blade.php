@@ -1,0 +1,315 @@
+@extends('layouts.app')
+
+@section('title')
+    <h1 class="h2">Event Scanner - {{ $event->title }}</h1>
+@endsection
+
+@section('content')
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-camera-video me-2"></i>Barcode Scanner</h5>
+                <span class="badge bg-success" id="scanner-status">Ready</span>
+            </div>
+            <div class="card-body">
+                <div id="scanner-container" class="text-center">
+                    <video id="scanner-video" class="scanner-video" playsinline></video>
+                    <canvas id="scanner-canvas" style="display: none;"></canvas>
+                </div>
+                <div class="mt-3 text-center">
+                    <button id="start-scanner" class="btn btn-primary" onclick="startScanner()">
+                        <i class="bi bi-camera me-1"></i> Start Scanner
+                    </button>
+                    <button id="stop-scanner" class="btn btn-secondary ms-2 d-none" onclick="stopScanner()">
+                        <i class="bi bi-camera-video-off me-1"></i> Stop Scanner
+                    </button>
+                </div>
+                <div class="mt-3">
+                    <div class="input-group">
+                        <input type="text" id="manual-barcode" class="form-control" placeholder="Or enter barcode manually...">
+                        <button class="btn btn-outline-primary" type="button" onclick="manualScan()">
+                            <i class="bi bi-search"></i> Scan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Scans</h5>
+            </div>
+            <div class="card-body" id="recent-scans">
+                <div class="text-center text-muted py-4" id="no-scans">
+                    <i class="bi bi-clock-history fs-1"></i>
+                    <p class="mt-2">No scans yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4 sticky-top" style="top: 2rem;">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Event Info</h5>
+            </div>
+            <div class="card-body">
+                <h6>{{ $event->title }}</h6>
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-calendar-range me-1"></i>
+                    {{ $event->start_date->format('M d, Y g:i A') }}
+                </p>
+                @if($event->location)
+                    <p class="text-muted small mb-2">
+                        <i class="bi bi-geo-alt me-1"></i> {{ $event->location }}
+                    </p>
+                @endif
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span>Total Registered</span>
+                    <strong id="total-registered">{{ $event->registered_count }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <span>Checked In</span>
+                    <strong id="total-checked-in" class="text-success">{{ $event->checked_in_count }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <span>Remaining</span>
+                    <strong id="total-remaining" class="text-warning">{{ $event->registered_count - $event->checked_in_count }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Organizer</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-1">Logged in as: <strong>{{ $scannerLink->organizer->name }}</strong></p>
+                <p class="text-muted small mb-0">Role: <span class="badge bg-warning text-dark">{{ ucfirst($scannerLink->organizer->role) }}</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+<script src="https://unpkg.com/@zxing/library@0.20.0/umd/index.min.js"></script>
+<script>
+    let codeReader = null;
+    let videoElement = document.getElementById('scanner-video');
+    let isScanning = false;
+
+    async function startScanner() {
+        try {
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            
+            const videoInputDevices = await codeReader.listVideoInputDevices();
+            if (videoInputDevices.length === 0) {
+                alert('No camera found. Please use manual entry.');
+                return;
+            }
+
+            // Prefer back camera on mobile
+            let selectedDeviceId = videoInputDevices[0].deviceId;
+            for (const device of videoInputDevices) {
+                if (device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')) {
+                    selectedDeviceId = device.deviceId;
+                    break;
+                }
+            }
+
+            document.getElementById('scanner-status').textContent = 'Scanning...';
+            document.getElementById('scanner-status').className = 'badge bg-warning text-dark';
+            document.getElementById('start-scanner').classList.add('d-none');
+            document.getElementById('stop-scanner').classList.remove('d-none');
+            
+            isScanning = true;
+
+            await codeReader.decodeFromVideoDevice(selectedDeviceId, 'scanner-video', (result, err) => {
+                if (result) {
+                    handleScanResult(result.getText());
+                }
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error('Scanner error:', err);
+                }
+            });
+
+        } catch (error) {
+            console.error('Failed to start scanner:', error);
+            alert('Failed to start camera. Please use manual entry.');
+        }
+    }
+
+    function stopScanner() {
+        if (codeReader) {
+            codeReader.reset();
+            codeReader = null;
+        }
+        isScanning = false;
+        document.getElementById('scanner-status').textContent = 'Stopped';
+        document.getElementById('scanner-status').className = 'badge bg-secondary';
+        document.getElementById('start-scanner').classList.remove('d-none');
+        document.getElementById('stop-scanner').classList.add('d-none');
+    }
+
+    function manualScan() {
+        const barcode = document.getElementById('manual-barcode').value.trim();
+        if (barcode) {
+            handleScanResult(barcode);
+            document.getElementById('manual-barcode').value = '';
+        }
+    }
+
+    async function handleScanResult(barcode) {
+        if (!isScanning && !confirm('Process this barcode?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('{{ route("scanner.scan.post", ["hash" => $scannerLink->hash]) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ barcode: barcode })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('success', data.message);
+                addRecentScan(data.registration);
+                updateStats();
+                playSuccessSound();
+            } else {
+                showToast('danger', data.message);
+                playErrorSound();
+            }
+        } catch (error) {
+            console.error('Scan error:', error);
+            showToast('danger', 'An error occurred. Please try again.');
+            playErrorSound();
+        }
+    }
+
+    function addRecentScan(registration) {
+        const container = document.getElementById('recent-scans');
+        const noScans = document.getElementById('no-scans');
+        if (noScans) noScans.remove();
+
+        const scanElement = document.createElement('div');
+        scanElement.className = 'border-bottom pb-2 mb-2 fade-in';
+        scanElement.innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <strong>${registration.user.name}</strong>
+                    <br>
+                    <small class="text-muted">${registration.barcode}</small>
+                </div>
+                <span class="badge bg-success">Checked In</span>
+            </div>
+            <small class="text-muted">Just now</small>
+        `;
+        container.insertBefore(scanElement, container.firstChild);
+
+        // Keep only last 10 scans
+        const scans = container.querySelectorAll('.border-bottom');
+        if (scans.length > 10) {
+            scans[scans.length - 1].remove();
+        }
+    }
+
+    async function updateStats() {
+        try {
+            const response = await fetch('{{ route("scanner.recent", ["hash" => $scannerLink->hash]) }}');
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('total-checked-in').textContent = data.scans.length;
+                document.getElementById('total-remaining').textContent = 
+                    parseInt(document.getElementById('total-registered').textContent) - data.scans.length;
+            }
+        } catch (error) {
+            console.error('Failed to update stats:', error);
+        }
+    }
+
+    function showToast(type, message) {
+        const toastContainer = document.getElementById('toast-container') || createToastContainer();
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        toastContainer.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    function playSuccessSound() {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+        audio.play().catch(() => {});
+    }
+
+    function playErrorSound() {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+        audio.play().catch(() => {});
+    }
+
+    // Load recent scans on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('{{ route("scanner.recent", ["hash" => $scannerLink->hash]) }}');
+            const data = await response.json();
+            if (data.success && data.scans.length > 0) {
+                const container = document.getElementById('recent-scans');
+                const noScans = document.getElementById('no-scans');
+                if (noScans) noScans.remove();
+                
+                data.scans.forEach(scan => {
+                    const scanElement = document.createElement('div');
+                    scanElement.className = 'border-bottom pb-2 mb-2';
+                    scanElement.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${scan.user.name}</strong>
+                                <br>
+                                <small class="text-muted">${scan.barcode}</small>
+                            </div>
+                            <span class="badge bg-success">Checked In</span>
+                        </div>
+                        <small class="text-muted">${new Date(scan.checked_in_at).toLocaleString()}</small>
+                    `;
+                    container.appendChild(scanElement);
+                });
+            }
+        } catch (error) {
+            console.error('Failed to load recent scans:', error);
+        }
+    });
+
+    // Allow Enter key in manual input
+    document.getElementById('manual-barcode').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            manualScan();
+        }
+    });
+</script>
+@endsection
