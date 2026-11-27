@@ -9,13 +9,14 @@ class RegistrationPolicy
 {
     public function view(User $user, Registration $registration): bool
     {
-        return $user->id === $registration->user_id
+        return $user->getKey() === $registration->getAttribute('user_id')
             || $user->isAdmin()
-            || ($user->isOrganizer() && $registration->event->organizer_id === $user->id);
+            || $user->isOrganizer() && $registration->event->getAttribute('organizer_id') === $user->getKey();
     }
 
     public function cancel(User $user, Registration $registration): bool
     {
-        return $user->id === $registration->user_id && $registration->status === 'registered';
+        return $user->getKey() === $registration->getAttribute('user_id')
+            && $registration->getAttribute('status') === 'registered';
     }
 }

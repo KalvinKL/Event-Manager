@@ -13,25 +13,44 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        User::factory()->create([
-            'name' => 'Admin User',
+        User::firstOrCreate([
             'email' => 'admin@example.com',
+        ], [
+            'name' => 'Admin User',
             'password' => Hash::make('password'),
             'role' => 'admin',
         ]);
 
-        User::factory()->create([
-            'name' => 'Organizer User',
-            'email' => 'organizer@example.com',
-            'password' => Hash::make('password'),
-            'role' => 'organizer',
-        ]);
+        $organizerEmail = config('app.demo_organizer_email');
+        $organizer = User::where('email', $organizerEmail)->first();
 
-        User::factory()->create([
-            'name' => 'Test Attendee',
+        if (! $organizer) {
+            $organizerPassword = config('app.demo_organizer_password');
+
+            if (! $organizerPassword && $organizerEmail !== 'organizer@example.com') {
+                throw new \RuntimeException('Set DEMO_ORGANIZER_PASSWORD to create the configured organizer account.');
+            }
+
+            $organizer = User::factory()->create([
+                'name' => 'Organizer User',
+                'email' => $organizerEmail,
+                'password' => Hash::make($organizerPassword ?: 'password'),
+                'role' => 'organizer',
+            ]);
+        }
+
+        if (! $organizer->isOrganizer()) {
+            throw new \RuntimeException('The configured demo event owner must have the organizer role.');
+        }
+
+        User::firstOrCreate([
             'email' => 'attendee@example.com',
+        ], [
+            'name' => 'Test Attendee',
             'password' => Hash::make('password'),
             'role' => 'attendee',
         ]);
+
+        $this->call(FestivalSeeder::class);
     }
 }

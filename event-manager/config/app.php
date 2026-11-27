@@ -54,6 +54,9 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'demo_organizer_email' => env('DEMO_ORGANIZER_EMAIL', 'organizer@example.com'),
+    'demo_organizer_password' => env('DEMO_ORGANIZER_PASSWORD'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

@@ -474,6 +474,10 @@
     transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.sidebar.sidebar-open {
+    transform: translateX(0);
+}
+
 @media (min-width: 1024px) {
     .sidebar {
         transform: translateX(0);

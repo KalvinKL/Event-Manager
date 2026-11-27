@@ -22,7 +22,7 @@
                         aria-expanded="false"
                         aria-controls="categories-menu"
                         id="categories-trigger">
-                    Categories
+                    Browse by Category
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                     </svg>
@@ -33,17 +33,6 @@
                      role="menu"
                      aria-orientation="vertical">
                     <div class="p-2">
-                        <a href="{{ route('events.index') }}"
-                           class="block px-4 py-2.5 rounded-lg text-secondary-700 hover:bg-primary-50 hover:text-primary-600 font-medium transition-colors flex items-center gap-3"
-                           role="menuitem">
-                            <div class="w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <span>All Festivals</span>
-                        </a>
-                        <hr class="my-2 border-secondary-100">
                         @php
                             $categories = [
                                 ['key' => 'music', 'label' => 'Music Festivals', 'icon' => 'music', 'color' => 'primary'],
@@ -115,7 +104,7 @@
     <div class="flex flex-col items-center justify-center h-full space-y-6">
         <a href="{{ route('home') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Home</a>
         <a href="{{ route('events.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">All Events</a>
-        <a href="{{ route('categories.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Categories</a>
+        <a href="{{ route('categories.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Browse by Category</a>
         <a href="#about" class="text-xl font-medium text-secondary-700 hover:text-primary-600">About</a>
         <a href="{{ route('login') }}" class="btn btn-outline text-xl px-8 py-3">Sign In</a>
         <a href="{{ route('register') }}" class="btn btn-primary text-xl px-8 py-3">Get Started</a>

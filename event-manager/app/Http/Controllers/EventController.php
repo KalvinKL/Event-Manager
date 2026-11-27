@@ -20,7 +20,7 @@ class EventController extends Controller
 
         // Search
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
@@ -31,17 +31,18 @@ class EventController extends Controller
 
         // Category Filter
         if ($request->filled('category')) {
-            $query->where('category', $request->category);
+            $query->where('category', $request->input('category'));
         }
 
         // Location Filter
         if ($request->filled('location')) {
-            $query->where('city', 'like', "%{$request->location}%");
+            $location = $request->input('location');
+            $query->where('city', 'like', "%{$location}%");
         }
 
         // Date Filter
         if ($request->filled('date_filter')) {
-            switch ($request->date_filter) {
+            switch ($request->input('date_filter')) {
                 case 'upcoming':
                     $query->where('start_date', '>=', now());
                     break;
@@ -55,7 +56,7 @@ class EventController extends Controller
         }
 
         // Sort
-        $sort = $request->get('sort', 'date_asc');
+        $sort = $request->input('sort', 'date_asc');
         switch ($sort) {
             case 'date_desc':
                 $query->orderBy('start_date', 'desc');
@@ -126,14 +127,14 @@ class EventController extends Controller
 
     public function editForOrganizer(Event $event)
     {
-        abort_unless($event->organizer_id === auth()->id(), 403);
+        abort_unless($event->getAttribute('organizer_id') === auth()->id(), 403);
 
         return view('events.edit', compact('event'));
     }
 
     public function updateForOrganizer(Request $request, Event $event)
     {
-        abort_unless($event->organizer_id === auth()->id(), 403);
+        abort_unless($event->getAttribute('organizer_id') === auth()->id(), 403);
 
         $validated = $this->validateEvent($request, false);
         $this->saveEvent($request, $event, $validated);
@@ -143,8 +144,9 @@ class EventController extends Controller
 
     public function destroy(Event $event)
     {
-        if ($event->image) {
-            Storage::disk('public')->delete($event->image);
+        $image = $event->getAttribute('image');
+        if ($image) {
+            Storage::disk('public')->delete($image);
         }
         $event->delete();
 
@@ -181,15 +183,17 @@ class EventController extends Controller
     private function saveEvent(Request $request, Event $event, array $validated): void
     {
         if ($request->hasFile('image')) {
-            if ($event->image) {
-                Storage::disk('public')->delete($event->image);
+            $image = $event->getAttribute('image');
+            if ($image) {
+                Storage::disk('public')->delete($image);
             }
             $validated['image'] = $request->file('image')->store('events', 'public');
         }
 
         if ($request->boolean('remove_image')) {
-            if ($event->image) {
-                Storage::disk('public')->delete($event->image);
+            $image = $event->getAttribute('image');
+            if ($image) {
+                Storage::disk('public')->delete($image);
             }
             $validated['image'] = null;
         }

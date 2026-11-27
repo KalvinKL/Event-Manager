@@ -6,55 +6,18 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ScannerController;
-use Carbon\Carbon;
+use App\Models\Event;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    // Create dummy festival events for landing page
-    $featuredEvents = collect([
-        (object) [
-            'id' => 1,
-            'title' => 'Jakarta International Java Jazz Festival 2025',
-            'description' => 'Indonesia\'s biggest jazz festival returns with world-class artists across multiple stages. Experience 3 days of incredible jazz, fusion, and contemporary music.',
-            'start_date' => Carbon::parse('2025-03-07 18:00'),
-            'end_date' => Carbon::parse('2025-03-09 23:59'),
-            'location' => 'JIExpo Kemayoran, Jakarta',
-            'city' => 'Jakarta',
-            'category' => 'Jazz Festival',
-            'image' => null,
-            'status' => 'published',
-            'max_attendees' => 50000,
-            'registrations' => (object) ['count' => 32450],
-        ],
-        (object) [
-            'id' => 2,
-            'title' => 'Djakarta Warehouse Project 2025',
-            'description' => 'Asia\'s largest electronic dance music festival. Featuring the world\'s top DJs, mind-blowing production, and unforgettable moments across multiple stages.',
-            'start_date' => Carbon::parse('2025-12-12 16:00'),
-            'end_date' => Carbon::parse('2025-12-13 06:00'),
-            'location' => 'JIExpo Kemayoran, Jakarta',
-            'city' => 'Jakarta',
-            'category' => 'EDM Festival',
-            'image' => null,
-            'status' => 'published',
-            'max_attendees' => 80000,
-            'registrations' => (object) ['count' => 67200],
-        ],
-        (object) [
-            'id' => 3,
-            'title' => 'Bali Beach Festival 2025',
-            'description' => 'Sun, sand, and beats at Bali\'s premier beach festival. International and local artists, sunset parties, and the ultimate tropical festival experience.',
-            'start_date' => Carbon::parse('2025-07-15 14:00'),
-            'end_date' => Carbon::parse('2025-07-17 23:59'),
-            'location' => 'Kuta Beach, Bali',
-            'city' => 'Bali',
-            'category' => 'Beach Festival',
-            'image' => null,
-            'status' => 'published',
-            'max_attendees' => 25000,
-            'registrations' => (object) ['count' => 18900],
-        ],
-    ]);
+    $featuredEvents = Event::query()
+        ->where('status', 'published')
+        ->where('start_date', '>=', now())
+        ->where('is_featured', true)
+        ->withCount(['registrations as registrations_count' => fn ($query) => $query->where('status', '!=', 'cancelled')])
+        ->orderBy('start_date')
+        ->take(3)
+        ->get();
 
     return view('welcome', compact('featuredEvents'));
 })->name('home');
@@ -102,6 +65,7 @@ Route::middleware(['auth', 'organizer'])->prefix('scanner')->name('scanner.')->g
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/users', [AdminController::class, 'users'])->name('users.index');
     Route::get('/events/{event}/scanners', [AdminController::class, 'eventScanners'])->name('event.scanners');
     Route::post('/events/{event}/scanners', [AdminController::class, 'generateScannerLink'])->name('scanners.generate');
     Route::delete('/scanners/{scannerLink}', [AdminController::class, 'revokeScannerLink'])->name('scanners.revoke');

@@ -2,21 +2,21 @@
 
 @section('title')
     <h1 class="page-title">Admin Dashboard</h1>
-    <p class="page-subtitle">System overview and management</p>
+    <p class="page-subtitle">Manage events and scanners</p>
 @endsection
 
 @section('header-actions')
-    <a href="{{ route('events.create') }}" class="btn btn-primary">
+    <a href="{{ route('events.create') }}" class="btn btn-primary px-3 sm:px-4" aria-label="Create event" title="Create event">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        Create Event
+        <span class="sr-only sm:not-sr-only">Create Event</span>
     </a>
 @endsection
 
 @section('content')
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-in">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8 animate-in">
         <div class="stat-card">
             <div class="flex items-center gap-4">
                 <div class="stat-icon-primary">
@@ -39,7 +39,7 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="stat-label">Total Registrations</p>
+                    <p class="stat-label">Active Registrations</p>
                     <p class="stat-value">{{ $events->sum('registrations_count') }}</p>
                 </div>
             </div>
@@ -61,6 +61,20 @@
 
         <div class="stat-card">
             <div class="flex items-center gap-4">
+                <div class="stat-icon-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003a6.375 6.375 0 00-12.75 0v.003A12.318 12.318 0 008.25 21c2.35 0 4.55-.655 6.375-1.795m.375-12.455a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm6.375 2.25a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="stat-label">Attendees</p>
+                    <p class="stat-value">{{ $attendeeCount }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="flex items-center gap-4">
                 <div class="stat-icon-info">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -74,21 +88,15 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="space-y-6">
         <!-- Events Table -->
-        <div class="lg:col-span-2 animate-in">
+        <div id="events" class="animate-in scroll-mt-24">
             <div class="card">
-                <div class="card-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="card-header">
                     <div>
                         <h2 class="text-lg font-semibold text-secondary-900">Events</h2>
                         <p class="text-sm text-secondary-500">Manage all events in the system</p>
                     </div>
-                    <a href="{{ route('events.create') }}" class="btn btn-primary btn-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        Create Event
-                    </a>
                 </div>
 
                 <div class="card-body p-0">
@@ -118,8 +126,8 @@
                                         <th scope="col">Event</th>
                                         <th scope="col">Date</th>
                                         <th scope="col">Status</th>
-                                        <th scope="col">Registrations</th>
-                                        <th scope="col">Scanners</th>
+                                        <th scope="col" class="hidden xl:table-cell">Registrations</th>
+                                        <th scope="col" class="hidden xl:table-cell">Scanners</th>
                                         <th scope="col"><span class="sr-only">Actions</span></th>
                                     </tr>
                                 </thead>
@@ -156,8 +164,8 @@
                                                     {{ ucfirst($event->status) }}
                                                 </span>
                                             </td>
-                                            <td class="text-secondary-700 font-medium">{{ $event->registrations_count }}</td>
-                                            <td class="text-secondary-700 font-medium">{{ $event->scanner_links_count }}</td>
+                                            <td class="hidden text-secondary-700 font-medium xl:table-cell">{{ $event->registrations_count }}</td>
+                                            <td class="hidden text-secondary-700 font-medium xl:table-cell">{{ $event->scanner_links_count }}</td>
                                             <td>
                                                 <div class="flex items-center gap-1">
                                                     <a href="{{ route('events.show', $event) }}"
@@ -194,74 +202,5 @@
             </div>
         </div>
 
-        <!-- User Management -->
-        <div class="animate-in" style="animation-delay: 0.1s;">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-lg font-semibold text-secondary-900 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                        </svg>
-                        User Management
-                    </h2>
-                </div>
-                <div class="card-body">
-                    <p class="text-sm text-secondary-500 mb-4">Promote attendees to organizers</p>
-
-                    @if($users->isEmpty())
-                        <div class="empty-state py-6">
-                            <div class="empty-state-icon">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                                </svg>
-                            </div>
-                            <p class="text-sm text-secondary-500 text-center">No users available to manage.</p>
-                        </div>
-                    @else
-                        <div class="space-y-3">
-                            @foreach($users as $organizer)
-                                <div class="flex items-center justify-between p-3 rounded-lg bg-secondary-50 hover:bg-secondary-100 transition-colors">
-                                    <div class="flex items-center gap-3">
-                                        <div class="avatar avatar-md">
-                                            {{ Str::upper($organizer->name[0]) }}
-                                        </div>
-                                        <div>
-                                            <p class="font-medium text-secondary-900">{{ $organizer->name }}</p>
-                                            <p class="text-sm text-secondary-500">{{ $organizer->email }}</p>
-                                        </div>
-                                    </div>
-
-                                    @if($organizer->isOrganizer())
-                                        <form action="{{ route('admin.users.remove-organizer', $organizer) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="btn btn-outline btn-sm text-warning-700 border-warning-300 hover:bg-warning-50"
-                                                    onclick="return confirm('Remove organizer role from {{ $organizer->name }}?')">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                Remove
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('admin.users.make-organizer', $organizer) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="btn btn-success btn-sm"
-                                                    onclick="return confirm('Make {{ $organizer->name }} an organizer?')">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                                </svg>
-                                                Make Organizer
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
     </div>
 @endsection

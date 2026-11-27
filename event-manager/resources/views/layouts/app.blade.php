@@ -44,8 +44,10 @@
                             $dashboardRoute = Auth::user()->isAdmin()
                                 ? route('admin.dashboard')
                                 : (Auth::user()->isOrganizer() ? route('organizer.dashboard') : route('dashboard'));
-                            $dashboardActive = request()->routeIs('dashboard', 'admin.*', 'organizer.*');
+                            $dashboardActive = request()->routeIs('dashboard', 'admin.*', 'organizer.*')
+                                && !request()->routeIs('admin.users.*');
                         @endphp
+                        @if(!Auth::user()->isAttendee())
                         <a href="{{ $dashboardRoute }}"
                            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-secondary-800 transition-colors {{ $dashboardActive ? 'bg-primary-600/20 text-white' : '' }}"
                            aria-current="{{ $dashboardActive ? 'page' : 'false' }}">
@@ -54,6 +56,7 @@
                             </svg>
                             <span>{{ ucfirst(Auth::user()->role) }} Dashboard</span>
                         </a>
+                        @endif
 
                         @if(Auth::user()->isAttendee())
                         <a href="{{ route('registrations.index') }}"
@@ -66,17 +69,17 @@
                         </a>
                         @endif
 
-                        @can('isAdmin')
-                            <a href="{{ route('admin.dashboard') }}"
-                               class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-secondary-800 transition-colors {{ request()->routeIs('admin.dashboard') ? 'bg-primary-600/20 text-white' : '' }}"
-                               aria-current="{{ request()->routeIs('admin.dashboard') ? 'page' : 'false' }}">
+                        @if(Auth::user()->isAdmin())
+                            <a href="{{ route('admin.users.index') }}"
+                               class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-secondary-800 transition-colors {{ request()->routeIs('admin.users.*') ? 'bg-primary-600/20 text-white' : '' }}"
+                               aria-current="{{ request()->routeIs('admin.users.*') ? 'page' : 'false' }}">
                                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span>Admin Panel</span>
+                                <span>User Management</span>
                             </a>
-                        @endcan
+                        @endif
                     @endauth
                 </nav>
 
@@ -243,7 +246,7 @@
 
         if (sidebar && sidebarOverlay && sidebarToggle) {
             function openSidebar() {
-                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('sidebar-open');
                 sidebarOverlay.classList.remove('hidden');
                 sidebarOverlay.classList.add('block');
                 sidebarToggle.setAttribute('aria-expanded', 'true');
@@ -251,7 +254,7 @@
             }
 
             function closeSidebar() {
-                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('sidebar-open');
                 sidebarOverlay.classList.add('hidden');
                 sidebarOverlay.classList.remove('block');
                 sidebarToggle.setAttribute('aria-expanded', 'false');
@@ -259,10 +262,10 @@
             }
 
             sidebarToggle.addEventListener('click', () => {
-                if (sidebar.classList.contains('-translate-x-full')) {
-                    openSidebar();
-                } else {
+                if (sidebar.classList.contains('sidebar-open')) {
                     closeSidebar();
+                } else {
+                    openSidebar();
                 }
             });
 
@@ -278,15 +281,11 @@
             });
 
             // Handle resize
-            window.addEventListener('resize', () => {
-                if (window.innerWidth >= 1024) {
-                    closeSidebar();
-                }
-            });
+            window.addEventListener('resize', closeSidebar);
 
             // Keyboard navigation
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && !sidebar.classList.contains('-translate-x-full')) {
+                if (e.key === 'Escape' && sidebar.classList.contains('sidebar-open')) {
                     closeSidebar();
                 }
             });

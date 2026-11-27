@@ -12,11 +12,42 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        $events = Event::withCount(['registrations', 'scannerLinks'])->latest()->get();
+        $events = Event::withCount([
+            'registrations as registrations_count' => fn ($query) => $query->where('status', '!=', 'cancelled'),
+            'scannerLinks',
+        ])->latest()->get();
         $organizers = User::where('role', 'organizer')->get();
-        $users = User::whereIn('role', ['organizer', 'attendee'])->orderBy('name')->get();
+        $attendeeCount = User::where('role', 'attendee')->count();
 
-        return view('admin.dashboard', compact('events', 'organizers', 'users'));
+        return view('admin.dashboard', compact('events', 'organizers', 'attendeeCount'));
+    }
+
+    public function users(Request $request)
+    {
+        $filters = $request->validate([
+            'user_search' => ['nullable', 'string', 'max:100'],
+            'user_role' => ['nullable', 'in:all,attendee,organizer'],
+        ]);
+        $userSearch = trim($filters['user_search'] ?? '');
+        $userRole = $filters['user_role'] ?? 'all';
+        $usersQuery = User::query()
+            ->whereIn('role', ['organizer', 'attendee'])
+            ->when($userRole !== 'all', fn ($query) => $query->where('role', $userRole))
+            ->when($userSearch !== '', function ($query) use ($userSearch): void {
+                $query->where(function ($query) use ($userSearch): void {
+                    $query->where('name', 'like', "%{$userSearch}%")
+                        ->orWhere('email', 'like', "%{$userSearch}%");
+                });
+            });
+        $users = $usersQuery
+            ->withCount('organizedEvents')
+            ->orderBy('name')
+            ->paginate(10)
+            ->withQueryString();
+        $attendeeCount = User::where('role', 'attendee')->count();
+        $organizerCount = User::where('role', 'organizer')->count();
+
+        return view('admin.users', compact('users', 'userSearch', 'userRole', 'attendeeCount', 'organizerCount'));
     }
 
     public function generateScannerLink(Request $request, Event $event)
@@ -33,10 +64,10 @@ class AdminController extends Controller
         $hash = $this->generateUniqueHash();
 
         $scannerLink = ScannerLink::create([
-            'event_id' => $event->id,
+            'event_id' => $event->getKey(),
             'organizer_id' => $organizer->id,
             'hash' => $hash,
-            'expires_at' => $request->expires_at,
+            'expires_at' => $request->input('expires_at'),
             'is_active' => true,
         ]);
 

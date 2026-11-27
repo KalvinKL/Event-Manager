@@ -7,6 +7,7 @@ use App\Models\Registration;
 use App\Models\ScannerLink;
 use App\Models\User;
 use App\Notifications\RegistrationConfirmation;
+use Database\Seeders\FestivalSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -25,8 +26,20 @@ class EventRolesAndTicketsTest extends TestCase
         ])->assertRedirect(route('dashboard'));
 
         $this->get('/admin')->assertForbidden();
+        $this->get(route('admin.users.index'))->assertForbidden();
         $this->get('/organizer')->assertForbidden();
         $this->get('/dashboard')->assertRedirect(route('home'));
+    }
+
+    public function test_logout_redirects_to_landing_page(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->post(route('logout'))
+            ->assertRedirect(route('home'));
+
+        $this->assertGuest();
     }
 
     public function test_organizers_can_only_manage_and_view_registrations_for_their_events(): void
@@ -54,6 +67,7 @@ class EventRolesAndTicketsTest extends TestCase
             ->assertRedirect(route('organizer.dashboard'));
 
         $this->actingAs($organizer)->get(route('admin.dashboard'))->assertForbidden();
+        $this->actingAs($organizer)->get(route('admin.users.index'))->assertForbidden();
 
         $this->actingAs($organizer)
             ->get(route('organizer.events.edit', $ownedEvent))
@@ -153,6 +167,33 @@ class EventRolesAndTicketsTest extends TestCase
         );
     }
 
+    public function test_admin_registration_metric_excludes_cancelled_registrations(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $organizer = User::factory()->create(['role' => 'organizer']);
+        $event = $this->createEvent($organizer);
+        $registeredAttendee = User::factory()->create(['role' => 'attendee']);
+        $cancelledAttendee = User::factory()->create(['role' => 'attendee']);
+
+        Registration::create([
+            'event_id' => $event->id,
+            'user_id' => $registeredAttendee->id,
+            'barcode' => 'EVT-ACTIVE123456',
+            'status' => 'registered',
+        ]);
+        Registration::create([
+            'event_id' => $event->id,
+            'user_id' => $cancelledAttendee->id,
+            'barcode' => 'EVT-CANCEL12345',
+            'status' => 'cancelled',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertViewHas('events', fn ($events) => $events->firstWhere('id', $event->id)->registrations_count === 1);
+    }
+
     public function test_admin_can_assign_an_event_to_an_organizer(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
@@ -160,10 +201,11 @@ class EventRolesAndTicketsTest extends TestCase
         $attendee = User::factory()->create(['role' => 'attendee']);
 
         $this->actingAs($admin)
-            ->get(route('admin.dashboard'))
+            ->get(route('admin.users.index'))
             ->assertOk()
             ->assertSee($organizer->name)
-            ->assertSee('Make Organizer');
+            ->assertSee('Make Organizer')
+            ->assertSee(route('admin.users.index'), false);
 
         $this->actingAs($admin)
             ->get(route('dashboard'))
@@ -189,6 +231,90 @@ class EventRolesAndTicketsTest extends TestCase
             'title' => 'Test event',
             'organizer_id' => $organizer->id,
         ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('Reassign events first')
+            ->assertSee('1 event assigned. Reassign them before changing this role.');
+    }
+
+    public function test_admin_dashboard_and_user_management_are_separate_pages(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $attendee = User::factory()->create(['role' => 'attendee']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Manage all events in the system')
+            ->assertSee(route('admin.users.index'), false)
+            ->assertDontSee('Search users');
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee('User Management')
+            ->assertSee($attendee->email)
+            ->assertDontSee('Manage all events in the system');
+    }
+
+    public function test_admin_user_management_searches_and_filters_only_attendees_and_organizers(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $attendee = User::factory()->create([
+            'name' => 'Avery Attendee',
+            'email' => 'avery@example.test',
+            'role' => 'attendee',
+        ]);
+        $organizer = User::factory()->create([
+            'name' => 'Morgan Organizer',
+            'email' => 'morgan@example.test',
+            'role' => 'organizer',
+        ]);
+        $protectedAdmin = User::factory()->create([
+            'name' => 'Protected Admin',
+            'email' => 'protected@example.test',
+            'role' => 'admin',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index', ['user_search' => 'avery', 'user_role' => 'attendee']))
+            ->assertOk()
+            ->assertSee($attendee->name)
+            ->assertDontSee($organizer->name)
+            ->assertDontSee($protectedAdmin->name)
+            ->assertSee('Admin accounts are protected.');
+    }
+
+    public function test_admin_cannot_change_another_admin_role(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $otherAdmin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.make-organizer', $otherAdmin))
+            ->assertSessionHas('error');
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.remove-organizer', $otherAdmin))
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('users', [
+            'id' => $otherAdmin->id,
+            'role' => 'admin',
+        ]);
+    }
+
+    public function test_attendee_does_not_see_dashboard_sidebar(): void
+    {
+        $attendee = User::factory()->create(['role' => 'attendee']);
+
+        $this->actingAs($attendee)
+            ->get(route('registrations.index'))
+            ->assertOk()
+            ->assertDontSee('id="sidebar"', false)
+            ->assertDontSee('Attendee Dashboard');
     }
 
     public function test_admin_scanner_links_are_bound_to_the_assigned_organizer(): void
@@ -220,6 +346,23 @@ class EventRolesAndTicketsTest extends TestCase
             'id' => $organizer->id,
             'role' => 'organizer',
         ]);
+    }
+
+    public function test_festival_seeder_assigns_upcoming_events_to_the_configured_organizer(): void
+    {
+        $organizer = User::factory()->create(['role' => 'organizer']);
+        config(['app.demo_organizer_email' => $organizer->email]);
+
+        $this->seed(FestivalSeeder::class);
+
+        $events = Event::where('organizer_id', $organizer->id)->get();
+
+        $this->assertCount(10, $events);
+        $this->assertTrue($events->every(fn (Event $event) => $event->start_date->isFuture()));
+
+        $this->seed(FestivalSeeder::class);
+
+        $this->assertSame(10, Event::where('organizer_id', $organizer->id)->count());
     }
 
     private function createEvent(User $organizer, string $title = 'Test event'): Event
