@@ -122,19 +122,19 @@
 <!-- Mobile Menu -->
 <div id="mobile-menu" class="md:hidden hidden fixed inset-0 z-50 bg-white animate-in">
     <div class="flex flex-col items-center justify-center h-full space-y-6">
-        <a href="{{ route('home') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600" onclick="closeMobileMenu()">Home</a>
-        <a href="{{ route('events.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600" onclick="closeMobileMenu()">Events</a>
-        <a href="#about" class="text-xl font-medium text-secondary-700 hover:text-primary-600" onclick="closeMobileMenu()">About</a>
-        <a href="{{ route('login') }}" class="btn btn-outline text-xl px-8 py-3" onclick="closeMobileMenu()">Sign In</a>
-        <a href="{{ route('register') }}" class="btn btn-primary text-xl px-8 py-3" onclick="closeMobileMenu()">Get Started</a>
+        <a href="{{ route('home') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Home</a>
+        <a href="{{ route('events.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Events</a>
+        <a href="#about" class="text-xl font-medium text-secondary-700 hover:text-primary-600">About</a>
+        <a href="{{ route('login') }}" class="btn btn-outline text-xl px-8 py-3">Sign In</a>
+        <a href="{{ route('register') }}" class="btn btn-primary text-xl px-8 py-3">Get Started</a>
     </div>
 </div>
 
 @section('content')
     <!-- Hero Section -->
     <section class="relative overflow-hidden animate-in">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary-600/10 via-transparent to-pink-600/10"></div>
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%233b82f6" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary-600/10 via-transparent to-pink-600/10"></div>
+        <div class="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%233b82f6" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 
         <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32 text-center">
             <!-- Badge -->
@@ -395,7 +395,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="card overflow-hidden bg-gradient-to-r from-primary-600 via-pink-600 to-orange-500">
                 <div class="p-8 sm:p-12 lg:p-16 text-center">
-                    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+                    <div class="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 
                     <div class="relative">
                         <svg class="w-20 h-20 mx-auto mb-6 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -470,7 +470,7 @@
 
             // Close on outside click
             mobileMenu?.addEventListener('click', (e) => {
-                if (e.target === mobileMenu) {
+                if (e.target === mobileMenu || e.target instanceof Element && e.target.closest('a')) {
                     closeMobileMenu();
                 }
             });

@@ -540,6 +540,17 @@
     color: theme('colors.secondary.500');
 }
 
+@media (max-width: 639px) {
+    .page-title {
+        font-size: 1.125rem;
+        line-height: 1.25;
+    }
+
+    .page-subtitle {
+        line-height: 1.25;
+    }
+}
+
 .stat-card {
     background-color: white;
     border-radius: 0.75rem;

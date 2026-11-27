@@ -6,7 +6,7 @@
 @endsection
 
 @section('header-actions')
-    <a href="{{ route('events.index') }}" class="btn btn-ghost">
+    <a href="{{ route('events.index') }}" class="btn btn-ghost" data-history-back>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
@@ -28,7 +28,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
         </button>
-        <button onclick="saveEvent()" class="btn btn-ghost p-2" aria-label="Save event">
+        <button onclick="saveEvent(event)" class="btn btn-ghost p-2" aria-label="Save event">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
             </svg>
@@ -149,9 +149,9 @@
     </section>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex lg:flex-row gap-8 min-w-0">
+        <div class="flex flex-col gap-6 min-w-0">
             <!-- Main Content -->
-            <div class="lg:col-span-8 space-y-6 min-w-0">
+            <div class="w-full space-y-6 min-w-0">
                 <!-- About Section -->
                 <section class="card animate-in overflow-hidden">
                     <div class="card-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -168,7 +168,7 @@
                     <div class="card-body">
                         @if($event->description)
                             <div class="prose prose-secondary max-w-none text-secondary-700 leading-relaxed">
-                                {{ nl2br(e($event->description)) }}
+                                {!! nl2br(e($event->description)) !!}
                             </div>
                         @else
                             <div class="text-center py-12">
@@ -231,17 +231,20 @@
                         </h2>
                     </div>
                     <div class="card-body">
-                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <div class="sm:col-span-2">
-                                <dt class="text-sm font-medium text-secondary-500 mb-1">Date & Time</dt>
-                                <dd class="flex flex-col sm:flex-row sm:items-center gap-3 text-secondary-900">
-                                    <div class="flex items-center gap-2 bg-primary-50 rounded-xl p-3">
-                                        <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2 min-w-0 rounded-xl bg-secondary-50 p-4">
+                                <dt class="text-sm font-medium text-secondary-500 mb-2">Date & Time</dt>
+                                <dd class="flex flex-wrap items-center gap-3 text-secondary-900">
+                                    <div class="flex min-w-0 items-center gap-3 rounded-xl bg-white p-3">
+                                        <svg class="w-5 h-5 flex-shrink-0 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                                         </svg>
-                                        <div>
-                                            <p class="font-medium">{{ $event->start_date->format('l, F d, Y') }}</p>
-                                            <p class="text-sm text-secondary-500">{{ $event->start_date->format('g:i A') }} - {{ $event->end_date->format('g:i A') }}</p>
+                                        <div class="min-w-0">
+                                            <p class="font-medium text-sm sm:text-base">
+                                                <span class="hidden sm:inline">{{ $event->start_date->format('l, F d, Y') }}</span>
+                                                <span class="sm:hidden">{{ $event->start_date->format('D, M d, Y') }}</span>
+                                            </p>
+                                            <p class="text-xs sm:text-sm text-secondary-500">{{ $event->start_date->format('g:i A') }} - {{ $event->end_date->format('g:i A') }}</p>
                                         </div>
                                     </div>
                                     @if($daysUntil > 0 && $isUpcoming)
@@ -253,22 +256,21 @@
                                             Event ended
                                         </span>
                                     @endif
-                                </div>
                             </dd>
                         </div>
 
-                        <div>
-                            <dt class="text-sm font-medium text-secondary-500 mb-1">Location</dt>
-                            <dd class="flex items-start gap-2 text-secondary-900">
+                        <div class="min-w-0 rounded-xl bg-secondary-50 p-4">
+                            <dt class="text-sm font-medium text-secondary-500 mb-2">Location</dt>
+                            <dd class="flex min-w-0 items-start gap-3 text-secondary-900">
                                 <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 0115 0z" />
                                     </svg>
                                 </div>
-                                <div>
+                                <div class="min-w-0">
                                     @if($event->location)
-                                        <p class="font-medium">{{ $event->location }}</p>
+                                        <p class="font-medium break-words">{{ $event->location }}</p>
                                     @else
                                         <p class="text-secondary-500">TBA</p>
                                     @endif
@@ -279,8 +281,8 @@
                             </dd>
                         </div>
 
-                        <div>
-                            <dt class="text-sm font-medium text-secondary-500 mb-1">Capacity</dt>
+                        <div class="min-w-0 rounded-xl bg-secondary-50 p-4">
+                            <dt class="text-sm font-medium text-secondary-500 mb-2">Capacity</dt>
                             <dd class="flex items-center gap-2 text-secondary-900">
                                 <div class="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -296,8 +298,8 @@
                             </dd>
                         </div>
 
-                        <div>
-                            <dt class="text-sm font-medium text-secondary-500 mb-1">Status</dt>
+                        <div class="min-w-0 rounded-xl bg-secondary-50 p-4">
+                            <dt class="text-sm font-medium text-secondary-500 mb-2">Status</dt>
                             <dd>
                                 <span class="badge px-3 py-1.5 font-medium
                                     @if($event->status === 'published') badge-success
@@ -308,8 +310,8 @@
                             </dd>
                         </div>
 
-                        <div>
-                            <dt class="text-sm font-medium text-secondary-500 mb-1">Organizer</dt>
+                        <div class="min-w-0 rounded-xl bg-secondary-50 p-4">
+                            <dt class="text-sm font-medium text-secondary-500 mb-2">Organizer</dt>
                             <dd class="flex items-center gap-2 text-secondary-900">
                                 <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center">
                                     <span class="font-medium text-sm">P</span>
@@ -318,67 +320,19 @@
                             </dd>
                         </div>
 
-                        <div class="sm:col-span-2">
-                            <dt class="text-sm font-medium text-secondary-500 mb-1">Created</dt>
+                        <div class="min-w-0 rounded-xl bg-secondary-50 p-4">
+                            <dt class="text-sm font-medium text-secondary-500 mb-2">Created</dt>
                             <dd class="text-secondary-600">{{ $event->created_at->format('M d, Y \a\t H:i') }}</dd>
                         </div>
                     </dl>
                 </div>
             </section>
 
-            <!-- Registration Progress -->
-            @if($event->max_attendees)
-            <section class="card animate-in" style="animation-delay: 0.2s;">
-                <div class="card-header">
-                    <h2 class="text-xl font-bold text-secondary-900 flex items-center gap-3">
-                        <svg class="w-6 h-6 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                        Registration Progress
-                    </h2>
-                </div>
-                <div class="card-body">
-                    <div class="space-y-4">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-secondary-500">Spots filled</span>
-                            <span class="font-bold text-secondary-900">{{ $percentage }}%</span>
-                        </div>
-                        <div class="h-4 bg-secondary-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full transition-all duration-700 ease-out
-                                @if($percentage >= 100) bg-danger-500
-                                @elseif($percentage >= 80) bg-warning-500
-                                @elseif($percentage >= 50) bg-primary-500
-                                @else bg-success-500 @endif"
-                                 style="width: {{ $percentage }}%"></div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-4 text-center text-sm">
-                            <div class="p-4 rounded-xl bg-secondary-50">
-                                <p class="text-2xl font-bold text-secondary-900">{{ $registrationsCount }}</p>
-                                <p class="text-secondary-500">Registered</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-secondary-50">
-                                <p class="text-2xl font-bold text-secondary-900">{{ $checkedInCount }}</p>
-                                <p class="text-secondary-500">Checked In</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-secondary-50">
-                                <p class="text-2xl font-bold
-                                    @if($event->hasAvailableSlots()) text-success-600
-                                    @else text-danger-600 @endif">
-                                    {{ $event->hasAvailableSlots() ? $event->max_attendees - $registrationsCount : 0 }}
-                                </p>
-                                <p class="text-secondary-500">Available</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            @endif
         </div>
-    </div>
 
-    <!-- Sidebar -->
-    <div class="lg:col-span-4 min-w-0">
-        <div class="sticky top-24 space-y-6 animate-in" style="animation-delay: 0.1s;">
+    <!-- Registration and sharing -->
+    <aside class="w-full min-w-0">
+        <div class="space-y-6 animate-in" style="animation-delay: 0.1s;">
             <!-- Registration Card -->
             <div class="card overflow-hidden">
                 @if($event->image)
@@ -452,16 +406,19 @@
                         </a>
                     @endauth
 
-                    @if($event->max_attendees)
+                </div>
+            </div>
+
+            @if($event->max_attendees)
                         <!-- Registration Progress Card -->
-                        <div class="card mt-6">
+                        <div class="card">
                             <div class="card-header">
-                                <h4 class="font-semibold text-secondary-900 mb-4 flex items-center gap-2">
+                                <h2 class="text-xl font-bold text-secondary-900 flex items-center gap-3">
                                     <svg class="w-5 h-5 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                     </svg>
                                     Registration Progress
-                                </h4>
+                                </h2>
                             </div>
                             <div class="card-body">
                                 <div class="space-y-4">
@@ -498,12 +455,10 @@
                                 </div>
                             </div>
                         </div>
-                    @endif
-                </div>
-            </div>
+            @endif
 
             <!-- Share Festival Card -->
-            <div class="card mt-6">
+            <div class="card">
                 <div class="card-header">
                     <h3 class="font-semibold text-secondary-900 flex items-center gap-2">
                         <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -534,9 +489,9 @@
                 </div>
             </div>
         </div>
-    </div>
+    </aside>
 </div>
-</section>
+</div>
 @endsection
 
 @section('scripts')
@@ -606,7 +561,7 @@
             }).catch(console.error);
         }
 
-        function saveEvent() {
+        function saveEvent(event) {
             // Toggle save state
             const btn = event.currentTarget;
             const icon = btn.querySelector('svg');
@@ -623,10 +578,27 @@
 
         // Add save event listener
         document.addEventListener('DOMContentLoaded', () => {
-            const saveBtn = document.querySelector('[onclick="saveEvent()"]');
-            if (saveBtn) {
-                saveBtn.addEventListener('click', saveEvent);
-            }
+            const backLink = document.querySelector('[data-history-back]');
+            backLink?.addEventListener('click', (event) => {
+                const hasSameOriginHistory = window.history.length > 1
+                    && document.referrer
+                    && new URL(document.referrer).origin === window.location.origin;
+
+                if (
+                    event.button !== 0
+                    || event.metaKey
+                    || event.ctrlKey
+                    || event.shiftKey
+                    || event.altKey
+                    || !hasSameOriginHistory
+                ) {
+                    return;
+                }
+
+                event.preventDefault();
+                window.history.back();
+            });
+
         });
     </script>
 @endsection

@@ -113,12 +113,12 @@
 
 <div id="mobile-menu" class="md:hidden hidden fixed inset-0 z-50 bg-white animate-in">
     <div class="flex flex-col items-center justify-center h-full space-y-6">
-        <a href="{{ route('home') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600" onclick="closeMobileMenu()">Home</a>
-        <a href="{{ route('events.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600" onclick="closeMobileMenu()">All Events</a>
-        <a href="{{ route('categories.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600" onclick="closeMobileMenu()">Categories</a>
-        <a href="#about" class="text-xl font-medium text-secondary-700 hover:text-primary-600" onclick="closeMobileMenu()">About</a>
-        <a href="{{ route('login') }}" class="btn btn-outline text-xl px-8 py-3" onclick="closeMobileMenu()">Sign In</a>
-        <a href="{{ route('register') }}" class="btn btn-primary text-xl px-8 py-3" onclick="closeMobileMenu()">Get Started</a>
+        <a href="{{ route('home') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Home</a>
+        <a href="{{ route('events.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">All Events</a>
+        <a href="{{ route('categories.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Categories</a>
+        <a href="#about" class="text-xl font-medium text-secondary-700 hover:text-primary-600">About</a>
+        <a href="{{ route('login') }}" class="btn btn-outline text-xl px-8 py-3">Sign In</a>
+        <a href="{{ route('register') }}" class="btn btn-primary text-xl px-8 py-3">Get Started</a>
     </div>
 </div>
 
@@ -402,7 +402,7 @@
 
             // Close on outside click
             mobileMenu?.addEventListener('click', (e) => {
-                if (e.target === mobileMenu) {
+                if (e.target === mobileMenu || e.target instanceof Element && e.target.closest('a')) {
                     closeMobileMenu();
                 }
             });

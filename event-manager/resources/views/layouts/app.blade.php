@@ -125,8 +125,8 @@
         <main id="main-content" class="{{ ($hideSidebar ?? false) ? 'flex-1 flex flex-col min-w-0' : 'main-content flex-1 flex flex-col min-w-0' }}">
             <!-- Top Bar -->
             <header class="top-bar">
-                <div class="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center gap-4">
+                <div class="flex min-h-16 items-center justify-between py-2 px-4 sm:px-6 lg:px-8">
+                    <div class="flex min-w-0 flex-1 items-center gap-4">
                         @unless($hideSidebar ?? false)
                         <button id="sidebar-toggle"
                                 class="lg:hidden p-2 rounded-lg text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 transition-colors"
@@ -138,12 +138,12 @@
                             </svg>
                         </button>
                         @endunless
-                        <div>
+                        <div class="min-w-0">
                             @yield('title')
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-shrink-0 items-center gap-3">
                         @yield('header-actions')
                     </div>
                 </div>
