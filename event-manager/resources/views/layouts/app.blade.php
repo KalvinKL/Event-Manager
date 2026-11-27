@@ -8,8 +8,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-secondary-50">
+    @php
+        $showSidebar = !($hideSidebar ?? false)
+            && !(Auth::check() && Auth::user()->isAttendee());
+    @endphp
     <div class="flex min-h-screen">
-        @unless($hideSidebar ?? false)
+        @if($showSidebar)
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar" aria-label="Main navigation">
             <div class="flex flex-col h-full">
@@ -127,15 +131,15 @@
 
         <!-- Mobile Sidebar Overlay -->
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden" aria-hidden="true"></div>
-        @endunless
+        @endif
 
         <!-- Main Content -->
-        <main id="main-content" class="{{ ($hideSidebar ?? false) ? 'flex-1 flex flex-col min-w-0' : 'main-content flex-1 flex flex-col min-w-0' }}">
+        <main id="main-content" class="{{ $showSidebar ? 'main-content flex-1 flex flex-col min-w-0' : 'flex-1 flex flex-col min-w-0' }}">
             <!-- Top Bar -->
             <header class="top-bar">
                 <div class="flex min-h-16 items-center justify-between py-2 px-4 sm:px-6 lg:px-8">
                     <div class="flex min-w-0 flex-1 items-center gap-4">
-                        @unless($hideSidebar ?? false)
+                        @if($showSidebar)
                         <button id="sidebar-toggle"
                                 class="lg:hidden p-2 rounded-lg text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 transition-colors"
                                 aria-label="Toggle navigation"
@@ -145,13 +149,30 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        @endunless
+                        @endif
                         <div class="min-w-0">
                             @yield('title')
                         </div>
                     </div>
 
                     <div class="flex flex-shrink-0 items-center gap-3">
+                        @if(Auth::check() && Auth::user()->isAttendee() && !request()->routeIs('home'))
+                            <a href="{{ route('home') }}"
+                               class="btn btn-ghost btn-icon-sm"
+                               aria-label="Home"
+                               title="Home">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955a1.125 1.125 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
+                                </svg>
+                            </a>
+                            <a href="{{ route('registrations.index') }}" class="btn btn-primary px-3 py-2 text-sm sm:text-base">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6.75V6a2.25 2.25 0 00-2.25-2.25h-4.5A2.25 2.25 0 007.5 6v.75m9 0H7.5m9 0h1.125c1.243 0 2.25 1.007 2.25 2.25v9.75A2.25 2.25 0 0117.625 21h-11.25a2.25 2.25 0 01-2.25-2.25V9a2.25 2.25 0 012.25-2.25H7.5m3 4.5h3m-3 3h3" />
+                                </svg>
+                                <span class="hidden sm:inline">My Registrations</span>
+                                <span class="sm:hidden">Tickets</span>
+                            </a>
+                        @endif
                         @yield('header-actions')
                     </div>
                 </div>

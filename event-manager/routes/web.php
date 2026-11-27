@@ -6,7 +6,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ScannerController;
-use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,8 +16,8 @@ Route::get('/', function () {
             'id' => 1,
             'title' => 'Jakarta International Java Jazz Festival 2025',
             'description' => 'Indonesia\'s biggest jazz festival returns with world-class artists across multiple stages. Experience 3 days of incredible jazz, fusion, and contemporary music.',
-            'start_date' => \Carbon\Carbon::parse('2025-03-07 18:00'),
-            'end_date' => \Carbon\Carbon::parse('2025-03-09 23:59'),
+            'start_date' => Carbon::parse('2025-03-07 18:00'),
+            'end_date' => Carbon::parse('2025-03-09 23:59'),
             'location' => 'JIExpo Kemayoran, Jakarta',
             'city' => 'Jakarta',
             'category' => 'Jazz Festival',
@@ -30,8 +30,8 @@ Route::get('/', function () {
             'id' => 2,
             'title' => 'Djakarta Warehouse Project 2025',
             'description' => 'Asia\'s largest electronic dance music festival. Featuring the world\'s top DJs, mind-blowing production, and unforgettable moments across multiple stages.',
-            'start_date' => \Carbon\Carbon::parse('2025-12-12 16:00'),
-            'end_date' => \Carbon\Carbon::parse('2025-12-13 06:00'),
+            'start_date' => Carbon::parse('2025-12-12 16:00'),
+            'end_date' => Carbon::parse('2025-12-13 06:00'),
             'location' => 'JIExpo Kemayoran, Jakarta',
             'city' => 'Jakarta',
             'category' => 'EDM Festival',
@@ -44,8 +44,8 @@ Route::get('/', function () {
             'id' => 3,
             'title' => 'Bali Beach Festival 2025',
             'description' => 'Sun, sand, and beats at Bali\'s premier beach festival. International and local artists, sunset parties, and the ultimate tropical festival experience.',
-            'start_date' => \Carbon\Carbon::parse('2025-07-15 14:00'),
-            'end_date' => \Carbon\Carbon::parse('2025-07-17 23:59'),
+            'start_date' => Carbon::parse('2025-07-15 14:00'),
+            'end_date' => Carbon::parse('2025-07-17 23:59'),
             'location' => 'Kuta Beach, Bali',
             'city' => 'Bali',
             'category' => 'Beach Festival',
@@ -74,7 +74,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        $user = Auth::user();
+        $user = auth()->user();
 
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
@@ -84,26 +84,7 @@ Route::middleware('auth')->group(function () {
             return redirect()->route('organizer.dashboard');
         }
 
-        $registrationsCount = $user->registrations()->count();
-        $checkedInCount = $user->registrations()->where('status', 'checked_in')->count();
-        $upcomingEventsCount = $user->registrations()
-            ->whereHas('event', fn($q) => $q->where('start_date', '>=', now()))
-            ->where('status', '!=', 'cancelled')
-            ->count();
-        $upcomingRegistrations = $user->registrations()
-            ->with('event')
-            ->whereHas('event', fn($q) => $q->where('start_date', '>=', now()))
-            ->where('status', '!=', 'cancelled')
-            ->latest()
-            ->take(5)
-            ->get();
-
-        return view('dashboard', compact(
-            'registrationsCount',
-            'checkedInCount',
-            'upcomingEventsCount',
-            'upcomingRegistrations'
-        ));
+        return redirect()->route('home');
     })->name('dashboard');
 
     Route::get('/my-registrations', [RegistrationController::class, 'myRegistrations'])->name('registrations.index');

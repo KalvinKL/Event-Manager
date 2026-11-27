@@ -97,15 +97,33 @@
 
         <!-- Right: Auth buttons -->
         <div class="flex items-center gap-3">
-            <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-primary-50 font-medium transition-colors">
-                Sign In
-            </a>
-            <a href="{{ route('register') }}" class="px-5 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-pink-600 text-white font-semibold hover:from-primary-700 hover:to-pink-700 transition-all duration-200 flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                Get Started
-            </a>
+            @auth
+                @if(Auth::user()->isAttendee())
+                    <a href="{{ route('registrations.index') }}" class="px-4 py-2 rounded-lg text-primary-700 bg-primary-50 hover:bg-primary-100 font-semibold transition-colors">
+                        My Registrations
+                    </a>
+                @else
+                    <a href="{{ Auth::user()->isAdmin() ? route('admin.dashboard') : route('organizer.dashboard') }}" class="px-4 py-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-primary-50 font-medium transition-colors">
+                        Dashboard
+                    </a>
+                @endif
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-primary-50 font-medium transition-colors">
+                        Logout
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-primary-50 font-medium transition-colors">
+                    Sign In
+                </a>
+                <a href="{{ route('register') }}" class="px-5 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-pink-600 text-white font-semibold hover:from-primary-700 hover:to-pink-700 transition-all duration-200 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    </svg>
+                    Get Started
+                </a>
+            @endauth
         </div>
     </nav>
 
@@ -125,8 +143,20 @@
         <a href="{{ route('home') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Home</a>
         <a href="{{ route('events.index') }}" class="text-xl font-medium text-secondary-700 hover:text-primary-600">Events</a>
         <a href="#about" class="text-xl font-medium text-secondary-700 hover:text-primary-600">About</a>
-        <a href="{{ route('login') }}" class="btn btn-outline text-xl px-8 py-3">Sign In</a>
-        <a href="{{ route('register') }}" class="btn btn-primary text-xl px-8 py-3">Get Started</a>
+        @auth
+            @if(Auth::user()->isAttendee())
+                <a href="{{ route('registrations.index') }}" class="btn btn-primary text-xl px-8 py-3">My Registrations</a>
+            @else
+                <a href="{{ Auth::user()->isAdmin() ? route('admin.dashboard') : route('organizer.dashboard') }}" class="btn btn-primary text-xl px-8 py-3">Dashboard</a>
+            @endif
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-outline text-xl px-8 py-3">Logout</button>
+            </form>
+        @else
+            <a href="{{ route('login') }}" class="btn btn-outline text-xl px-8 py-3">Sign In</a>
+            <a href="{{ route('register') }}" class="btn btn-primary text-xl px-8 py-3">Get Started</a>
+        @endauth
     </div>
 </div>
 
@@ -161,12 +191,20 @@
                     </svg>
                     Explore Festivals
                 </a>
+                @guest
                 <a href="{{ route('register') }}" class="btn btn-outline btn-lg w-full sm:w-auto border-pink-300 text-pink-600 hover:bg-pink-50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                     Join Free
                 </a>
+                @else
+                    @if(Auth::user()->isAttendee())
+                    <a href="{{ route('registrations.index') }}" class="btn btn-outline btn-lg w-full sm:w-auto border-pink-300 text-pink-600 hover:bg-pink-50">
+                        My Registrations
+                    </a>
+                    @endif
+                @endguest
             </div>
 
             <!-- Trust Indicators -->
@@ -362,9 +400,11 @@
                             </svg>
                             Browse Festivals
                         </a>
-                        <a href="{{ route('register') }}" class="btn btn-outline border-pink-300 text-pink-600 hover:bg-pink-50">
-                            Create Free Account
-                        </a>
+                        @guest
+                            <a href="{{ route('register') }}" class="btn btn-outline border-pink-300 text-pink-600 hover:bg-pink-50">
+                                Create Free Account
+                            </a>
+                        @endguest
                     </div>
                 </div>
 
@@ -412,12 +452,20 @@
                         </p>
 
                         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <a href="{{ route('register') }}" class="btn btn-lg bg-white text-primary-600 hover:bg-secondary-50 w-full sm:w-auto">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                </svg>
-                                Get Started Free
-                            </a>
+                            @guest
+                                <a href="{{ route('register') }}" class="btn btn-lg bg-white text-primary-600 hover:bg-secondary-50 w-full sm:w-auto">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                    </svg>
+                                    Get Started Free
+                                </a>
+                            @else
+                                @if(Auth::user()->isAttendee())
+                                    <a href="{{ route('registrations.index') }}" class="btn btn-lg bg-white text-primary-600 hover:bg-secondary-50 w-full sm:w-auto">
+                                        My Registrations
+                                    </a>
+                                @endif
+                            @endguest
                             <a href="{{ route('events.index') }}" class="btn btn-lg btn-outline border-white text-white hover:bg-white/10 w-full sm:w-auto">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

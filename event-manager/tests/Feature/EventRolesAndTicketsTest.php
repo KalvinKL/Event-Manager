@@ -15,13 +15,18 @@ class EventRolesAndTicketsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_attendees_cannot_access_admin_or_organizer_dashboards(): void
+    public function test_attendees_cannot_access_admin_or_organizer_dashboards_and_return_home(): void
     {
         $attendee = User::factory()->create(['role' => 'attendee']);
 
-        $this->actingAs($attendee)->get('/admin')->assertForbidden();
-        $this->actingAs($attendee)->get('/organizer')->assertForbidden();
-        $this->actingAs($attendee)->get('/dashboard')->assertOk();
+        $this->post(route('login'), [
+            'email' => $attendee->email,
+            'password' => 'password',
+        ])->assertRedirect(route('dashboard'));
+
+        $this->get('/admin')->assertForbidden();
+        $this->get('/organizer')->assertForbidden();
+        $this->get('/dashboard')->assertRedirect(route('home'));
     }
 
     public function test_organizers_can_only_manage_and_view_registrations_for_their_events(): void
