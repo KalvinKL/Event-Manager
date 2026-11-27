@@ -9,7 +9,9 @@ class RegistrationPolicy
 {
     public function view(User $user, Registration $registration): bool
     {
-        return $user->id === $registration->user_id || $user->isAdmin() || $user->isOrganizer();
+        return $user->id === $registration->user_id
+            || $user->isAdmin()
+            || ($user->isOrganizer() && $registration->event->organizer_id === $user->id);
     }
 
     public function cancel(User $user, Registration $registration): bool

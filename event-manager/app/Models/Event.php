@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
     protected $fillable = [
+        'organizer_id',
         'title',
         'description',
         'start_date',
@@ -33,6 +35,11 @@ class Event extends Model
         return $this->hasMany(Registration::class);
     }
 
+    public function organizer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'organizer_id');
+    }
+
     public function scannerLinks(): HasMany
     {
         return $this->hasMany(ScannerLink::class);
@@ -50,7 +57,7 @@ class Event extends Model
 
     public function hasAvailableSlots(): bool
     {
-        if (!$this->max_attendees) {
+        if (! $this->max_attendees) {
             return true;
         }
 

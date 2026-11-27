@@ -12,26 +12,23 @@
                 <h5 class="mb-0">Generate Scanner Link</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ route('admin.scanners.generate', $event) }}">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="organizer_id" class="form-label">Organizer</label>
-                        <select class="form-select" id="organizer_id" name="organizer_id" required>
-                            <option value="">Select an organizer</option>
-                            @foreach($organizers as $organizer)
-                                <option value="{{ $organizer->id }}">{{ $organizer->name }} ({{ $organizer->email }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="expires_at" class="form-label">Expires At (Optional)</label>
-                        <input type="datetime-local" class="form-control" id="expires_at" name="expires_at">
-                        <div class="form-text">Leave empty for no expiration</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-plus-lg me-1"></i> Generate Scanner Link
-                    </button>
-                </form>
+                @if($event->organizer && $event->organizer->isOrganizer())
+                    <p class="mb-3">Assigned organizer: <strong>{{ $event->organizer->name }}</strong> ({{ $event->organizer->email }})</p>
+                    <form method="POST" action="{{ route('admin.scanners.generate', $event) }}">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="expires_at" class="form-label">Expires At (Optional)</label>
+                            <input type="datetime-local" class="form-control" id="expires_at" name="expires_at">
+                            <div class="form-text">Leave empty for no expiration</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-lg me-1"></i> Generate Scanner Link
+                        </button>
+                    </form>
+                @else
+                    <p class="text-warning mb-2">Assign an organizer to this event first.</p>
+                    <a href="{{ route('events.edit', $event) }}" class="btn btn-outline-primary">Assign organizer</a>
+                @endif
             </div>
         </div>
 
@@ -49,7 +46,7 @@
                         </button>
                     </div>
                     <p class="text-muted small mb-0">
-                        Share this link with the organizer. They can use it to scan attendee barcodes at the event.
+                        Share this link with the assigned organizer. They must sign in to scan attendee QR tickets.
                         @if(session('scanner_link')->expires_at)
                             <br>This link expires on {{ session('scanner_link')->expires_at->format('M d, Y g:i A') }}.
                         @endif
@@ -106,7 +103,7 @@
                     <thead>
                         <tr>
                             <th>Organizer</th>
-                            <th>Hash</th>
+                            <th>Scanner URL</th>
                             <th>Status</th>
                             <th>Expires</th>
                             <th>Created</th>
@@ -122,7 +119,14 @@
                                     <small class="text-muted">{{ $link->organizer->email }}</small>
                                 </td>
                                 <td>
-                                    <code class="text-truncate d-inline-block" style="max-width: 150px;">{{ $link->hash }}</code>
+                                    <div class="input-group input-group-sm" style="min-width: 300px;">
+                                        <input type="text"
+                                               class="form-control font-monospace"
+                                               value="{{ $link->getScannerUrl() }}"
+                                               readonly
+                                               id="scanner-url-{{ $link->id }}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('scanner-url-{{ $link->id }}')">Copy</button>
+                                    </div>
                                 </td>
                                 <td>
                                     @if($link->isValid())
@@ -144,9 +148,6 @@
                                 <td>{{ $link->created_at->format('M d, Y') }}</td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="{{ $link->getScannerUrl() }}" target="_blank" class="btn btn-outline-info" title="Test Link">
-                                            <i class="bi bi-box-arrow-up-right"></i>
-                                        </a>
                                         @if($link->is_active)
                                             <form action="{{ route('admin.scanners.revoke', $link) }}" method="POST" class="d-inline">
                                                 @csrf @method('DELETE')

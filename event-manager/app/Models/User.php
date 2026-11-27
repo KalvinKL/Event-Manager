@@ -30,6 +30,11 @@ class User extends Authenticatable
         return $this->hasMany(Registration::class);
     }
 
+    public function organizedEvents(): HasMany
+    {
+        return $this->hasMany(Event::class, 'organizer_id');
+    }
+
     public function scannerLinks(): HasMany
     {
         return $this->hasMany(ScannerLink::class, 'organizer_id');

@@ -32,7 +32,7 @@ class ScannerLink extends Model
 
     public function isValid(): bool
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
 
@@ -40,7 +40,13 @@ class ScannerLink extends Model
             return false;
         }
 
-        return true;
+        $event = $this->event;
+        $organizer = $this->organizer;
+
+        return $event
+            && $organizer
+            && $organizer->isOrganizer()
+            && $event->organizer_id === $this->organizer_id;
     }
 
     public function getScannerUrl(): string

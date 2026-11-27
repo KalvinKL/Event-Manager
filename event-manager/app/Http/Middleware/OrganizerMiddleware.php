@@ -10,7 +10,7 @@ class OrganizerMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->check() || !(auth()->user()->isOrganizer() || auth()->user()->isAdmin())) {
+        if (! auth()->check() || ! auth()->user()->isOrganizer()) {
             abort(403, 'Unauthorized. Organizer access required.');
         }
 

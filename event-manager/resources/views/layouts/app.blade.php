@@ -36,15 +36,22 @@
                     </a>
 
                     @auth
-                        <a href="{{ route('dashboard') }}"
-                           class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-secondary-800 transition-colors {{ request()->routeIs('dashboard') ? 'bg-primary-600/20 text-white' : '' }}"
-                           aria-current="{{ request()->routeIs('dashboard') ? 'page' : 'false' }}">
+                        @php
+                            $dashboardRoute = Auth::user()->isAdmin()
+                                ? route('admin.dashboard')
+                                : (Auth::user()->isOrganizer() ? route('organizer.dashboard') : route('dashboard'));
+                            $dashboardActive = request()->routeIs('dashboard', 'admin.*', 'organizer.*');
+                        @endphp
+                        <a href="{{ $dashboardRoute }}"
+                           class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-secondary-800 transition-colors {{ $dashboardActive ? 'bg-primary-600/20 text-white' : '' }}"
+                           aria-current="{{ $dashboardActive ? 'page' : 'false' }}">
                             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                             </svg>
-                            <span>Dashboard</span>
+                            <span>{{ ucfirst(Auth::user()->role) }} Dashboard</span>
                         </a>
 
+                        @if(Auth::user()->isAttendee())
                         <a href="{{ route('registrations.index') }}"
                            class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-secondary-800 transition-colors {{ request()->routeIs('registrations.index') ? 'bg-primary-600/20 text-white' : '' }}"
                            aria-current="{{ request()->routeIs('registrations.index') ? 'page' : 'false' }}">
@@ -53,6 +60,7 @@
                             </svg>
                             <span>My Registrations</span>
                         </a>
+                        @endif
 
                         @can('isAdmin')
                             <a href="{{ route('admin.dashboard') }}"

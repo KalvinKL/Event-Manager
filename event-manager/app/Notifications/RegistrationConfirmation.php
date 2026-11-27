@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Registration;
+use App\Services\RegistrationQrCodeGenerator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -30,13 +31,18 @@ class RegistrationConfirmation extends Notification implements ShouldQueue
             ->subject("Registration Confirmed: {$event->title}")
             ->greeting("Hello {$notifiable->name}!")
             ->line("You have successfully registered for **{$event->title}**.")
-            ->line("**Event Details:**")
+            ->line('**Event Details:**')
             ->line("Date: {$event->start_date->format('l, F d, Y')} at {$event->start_date->format('g:i A')}")
-            ->line("Location: " . ($event->location ?? 'TBA'))
-            ->line("**Your Barcode:** `{$this->registration->barcode}`")
-            ->line("Please save this barcode. You will need to present it at the event for check-in.")
+            ->line('Location: '.($event->location ?? 'TBA'))
+            ->line("**Your ticket code:** `{$this->registration->barcode}`")
+            ->line('Your QR ticket is attached. Please save it and present it at the event for check-in.')
             ->action('View Registration', $registrationUrl)
-            ->line('We look forward to seeing you at the event!');
+            ->line('We look forward to seeing you at the event!')
+            ->attachData(
+                app(RegistrationQrCodeGenerator::class)->png($this->registration->barcode),
+                "ticket-{$this->registration->barcode}.png",
+                ['mime' => 'image/png']
+            );
     }
 
     public function toArray(object $notifiable): array

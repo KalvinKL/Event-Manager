@@ -5,18 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Registration;
 use App\Models\ScannerLink;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ScannerController extends Controller
 {
     public function showScanPage($hash)
     {
-        $scannerLink = ScannerLink::where('hash', $hash)->first();
-
-        if (!$scannerLink || !$scannerLink->isValid()) {
-            abort(404, 'Invalid or expired scanner link.');
-        }
-
+        $scannerLink = $this->authorizedScannerLink($hash);
         $event = $scannerLink->event;
 
         return view('scanner.scan', compact('scannerLink', 'event'));
@@ -24,14 +18,7 @@ class ScannerController extends Controller
 
     public function scan(Request $request, $hash)
     {
-        $scannerLink = ScannerLink::where('hash', $hash)->first();
-
-        if (!$scannerLink || !$scannerLink->isValid()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid or expired scanner link.',
-            ], 404);
-        }
+        $scannerLink = $this->authorizedScannerLink($hash);
 
         $request->validate([
             'barcode' => 'required|string',
@@ -41,7 +28,7 @@ class ScannerController extends Controller
             ->where('event_id', $scannerLink->event_id)
             ->first();
 
-        if (!$registration) {
+        if (! $registration) {
             return response()->json([
                 'success' => false,
                 'message' => 'Registration not found for this event.',
@@ -74,14 +61,7 @@ class ScannerController extends Controller
 
     public function recentScans($hash)
     {
-        $scannerLink = ScannerLink::where('hash', $hash)->first();
-
-        if (!$scannerLink || !$scannerLink->isValid()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid or expired scanner link.',
-            ], 404);
-        }
+        $scannerLink = $this->authorizedScannerLink($hash);
 
         $scans = Registration::where('event_id', $scannerLink->event_id)
             ->where('status', 'checked_in')
@@ -94,5 +74,26 @@ class ScannerController extends Controller
             'success' => true,
             'scans' => $scans,
         ]);
+    }
+
+    private function authorizedScannerLink(string $hash): ScannerLink
+    {
+        $scannerLink = ScannerLink::with(['event', 'organizer'])
+            ->where('hash', $hash)
+            ->first();
+
+        if (! $scannerLink || ! $scannerLink->isValid()) {
+            abort(404, 'Invalid or expired scanner link.');
+        }
+
+        abort_unless(
+            auth()->check()
+                && auth()->user()->isOrganizer()
+                && auth()->id() === $scannerLink->organizer_id,
+            403,
+            'This scanner link belongs to another organizer.'
+        );
+
+        return $scannerLink;
     }
 }

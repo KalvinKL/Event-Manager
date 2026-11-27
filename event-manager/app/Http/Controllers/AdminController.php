@@ -6,36 +6,28 @@ use App\Models\Event;
 use App\Models\ScannerLink;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-        $this->middleware('admin');
-    }
-
     public function dashboard()
     {
         $events = Event::withCount(['registrations', 'scannerLinks'])->latest()->get();
         $organizers = User::where('role', 'organizer')->get();
+        $users = User::whereIn('role', ['organizer', 'attendee'])->orderBy('name')->get();
 
-        return view('admin.dashboard', compact('events', 'organizers'));
+        return view('admin.dashboard', compact('events', 'organizers', 'users'));
     }
 
     public function generateScannerLink(Request $request, Event $event)
     {
         $request->validate([
-            'organizer_id' => 'required|exists:users,id',
             'expires_at' => 'nullable|date|after:now',
         ]);
 
-        $organizer = User::findOrFail($request->organizer_id);
-
-        if (!$organizer->isOrganizer()) {
-            return back()->with('error', 'Selected user is not an organizer.');
+        $organizer = $event->organizer;
+        if (! $organizer || ! $organizer->isOrganizer()) {
+            return back()->with('error', 'Assign an organizer to this event before generating a scanner link.');
         }
 
         $hash = $this->generateUniqueHash();
@@ -61,12 +53,13 @@ class AdminController extends Controller
 
     public function eventScanners(Event $event)
     {
-        $scannerLinks = $event->scannerLinks()->with('organizer')->latest()->paginate(15);
+        $event->load('organizer');
+        $scannerLinks = $event->scannerLinks()->with(['organizer', 'event'])->latest()->paginate(15);
 
         return view('admin.event-scanners', compact('event', 'scannerLinks'));
     }
 
-    public function makeOrganizer(Request $request, User $user)
+    public function makeOrganizer(User $user)
     {
         if ($user->isAdmin()) {
             return back()->with('error', 'Cannot change admin role.');
@@ -77,10 +70,14 @@ class AdminController extends Controller
         return back()->with('success', "{$user->name} is now an organizer.");
     }
 
-    public function removeOrganizer(Request $request, User $user)
+    public function removeOrganizer(User $user)
     {
         if ($user->isAdmin()) {
             return back()->with('error', 'Cannot change admin role.');
+        }
+
+        if ($user->organizedEvents()->exists()) {
+            return back()->with('error', 'Reassign this organizer\'s events before removing their role.');
         }
 
         $user->update(['role' => 'attendee']);

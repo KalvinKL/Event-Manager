@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ScannerController;
 use Illuminate\Support\Facades\Auth;
@@ -74,6 +75,15 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         $user = Auth::user();
+
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->isOrganizer()) {
+            return redirect()->route('organizer.dashboard');
+        }
+
         $registrationsCount = $user->registrations()->count();
         $checkedInCount = $user->registrations()->where('status', 'checked_in')->count();
         $upcomingEventsCount = $user->registrations()
@@ -103,7 +113,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/registrations/{registration}', [RegistrationController::class, 'cancel'])->name('registrations.cancel');
 });
 
-Route::prefix('scanner')->name('scanner.')->group(function () {
+Route::middleware(['auth', 'organizer'])->prefix('scanner')->name('scanner.')->group(function () {
     Route::get('/{hash}', [ScannerController::class, 'showScanPage'])->name('scan');
     Route::post('/{hash}/scan', [ScannerController::class, 'scan'])->name('scan.post');
     Route::get('/{hash}/recent', [ScannerController::class, 'recentScans'])->name('recent');
@@ -124,4 +134,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
     Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
+});
+
+Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
+    Route::get('/', [OrganizerController::class, 'dashboard'])->name('dashboard');
+    Route::get('/events/{event}/edit', [EventController::class, 'editForOrganizer'])->name('events.edit');
+    Route::put('/events/{event}', [EventController::class, 'updateForOrganizer'])->name('events.update');
 });

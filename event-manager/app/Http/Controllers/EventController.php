@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class EventController extends Controller
 {
@@ -78,24 +79,14 @@ class EventController extends Controller
 
     public function create()
     {
-        return view('events.create');
+        $organizers = User::where('role', 'organizer')->orderBy('name')->get();
+
+        return view('events.create', compact('organizers'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'nullable|string|max:255',
-            'city' => 'nullable|string|max:255',
-            'category' => 'nullable|string|max:100',
-            'image' => 'nullable|image|max:2048',
-            'status' => 'required|in:draft,published,cancelled',
-            'max_attendees' => 'nullable|integer|min:1',
-            'is_featured' => 'nullable|boolean',
-        ]);
+        $validated = $this->validateEvent($request, true);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('events', 'public');
@@ -119,12 +110,50 @@ class EventController extends Controller
 
     public function edit(Event $event)
     {
-        return view('events.edit', compact('event'));
+        $organizers = User::where('role', 'organizer')->orderBy('name')->get();
+
+        return view('events.edit', compact('event', 'organizers'));
     }
 
     public function update(Request $request, Event $event)
     {
-        $validated = $request->validate([
+        $validated = $this->validateEvent($request, true);
+
+        $this->saveEvent($request, $event, $validated);
+
+        return redirect()->route('events.index')->with('success', 'Festival updated successfully.');
+    }
+
+    public function editForOrganizer(Event $event)
+    {
+        abort_unless($event->organizer_id === auth()->id(), 403);
+
+        return view('events.edit', compact('event'));
+    }
+
+    public function updateForOrganizer(Request $request, Event $event)
+    {
+        abort_unless($event->organizer_id === auth()->id(), 403);
+
+        $validated = $this->validateEvent($request, false);
+        $this->saveEvent($request, $event, $validated);
+
+        return redirect()->route('organizer.dashboard')->with('success', 'Festival updated successfully.');
+    }
+
+    public function destroy(Event $event)
+    {
+        if ($event->image) {
+            Storage::disk('public')->delete($event->image);
+        }
+        $event->delete();
+
+        return redirect()->route('events.index')->with('success', 'Festival deleted successfully.');
+    }
+
+    private function validateEvent(Request $request, bool $includeOrganizer): array
+    {
+        $rules = [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'start_date' => 'required|date',
@@ -136,8 +165,21 @@ class EventController extends Controller
             'status' => 'required|in:draft,published,cancelled',
             'max_attendees' => 'nullable|integer|min:1',
             'is_featured' => 'nullable|boolean',
-        ]);
+        ];
 
+        if ($includeOrganizer) {
+            $rules['organizer_id'] = [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')->where(fn ($query) => $query->where('role', 'organizer')),
+            ];
+        }
+
+        return $request->validate($rules);
+    }
+
+    private function saveEvent(Request $request, Event $event, array $validated): void
+    {
         if ($request->hasFile('image')) {
             if ($event->image) {
                 Storage::disk('public')->delete($event->image);
@@ -153,17 +195,5 @@ class EventController extends Controller
         }
 
         $event->update($validated);
-
-        return redirect()->route('events.index')->with('success', 'Festival updated successfully.');
-    }
-
-    public function destroy(Event $event)
-    {
-        if ($event->image) {
-            Storage::disk('public')->delete($event->image);
-        }
-        $event->delete();
-
-        return redirect()->route('events.index')->with('success', 'Festival deleted successfully.');
     }
 }

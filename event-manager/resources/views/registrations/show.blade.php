@@ -46,7 +46,10 @@
             <div class="card-body text-center">
                 <div class="alert alert-light border">
                     <div class="barcode-display mb-2">{{ $registration->barcode }}</div>
-                    <div id="barcode-image"></div>
+                    <img src="data:image/png;base64,{{ base64_encode($qrCodePng) }}"
+                         alt="QR ticket code for {{ $registration->event->title }}"
+                         width="280"
+                         height="280">
                 </div>
                 <p class="text-muted small mt-3">
                     Present this barcode at the event for check-in. You can also save this page or take a screenshot.
@@ -78,24 +81,4 @@
         @endif
     </div>
 </div>
-@endsection
-
-@section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/@barcode-js/barcode-js@2.0.0/dist/barcode.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const barcodeValue = '{{ $registration->barcode }}';
-        try {
-            const barcode = new Barcode('#barcode-image', barcodeValue, {
-                format: 'CODE128',
-                displayValue: true,
-                fontSize: 16,
-                height: 80,
-                margin: 10
-            });
-        } catch (e) {
-            console.log('Barcode generation failed:', e);
-        }
-    });
-</script>
 @endsection

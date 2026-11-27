@@ -1,15 +1,41 @@
 @php
     $isEdit = isset($event);
-    $formAction = $isEdit ? route('events.update', $event) : route('events.store');
-    $formMethod = $isEdit ? 'PUT' : 'POST';
-    $cancelUrl = $isEdit ? route('events.show', $event) : route('events.index');
+    $isOrganizer = auth()->user()->isOrganizer();
+    $isAdmin = auth()->user()->isAdmin();
+    $formAction = $isEdit
+        ? ($isOrganizer ? route('organizer.events.update', $event) : route('events.update', $event))
+        : route('events.store');
+    $cancelUrl = $isOrganizer
+        ? route('organizer.dashboard')
+        : ($isEdit ? route('events.show', $event) : route('events.index'));
     $submitText = $isEdit ? 'Update Festival' : 'Create Festival';
     $submitIcon = $isEdit ? 'M3.75 3v11.25A2.25 2.25 0 016 16.5h2.25M3.75 3h-1.5A2.25 2.25 0 000 5.25v11.25A2.25 2.25 0 012.25 19h11.25A2.25 2.25 0 0116 16.75V14.5m0 0H18m-2.25 0l2.15 2.15a12.06 12.06 0 01-3.63 3.63' : 'M12 4.5v15m7.5-7.5h-15';
 @endphp
 
-<form action="{{ $formAction }}" method="{{ $formMethod }}" enctype="multipart/form-data" class="space-y-6" novalidate>
+<form action="{{ $formAction }}" method="POST" enctype="multipart/form-data" class="space-y-6" novalidate>
     @csrf
     @if($isEdit) @method('PUT') @endif
+
+    @if($isAdmin)
+        <div class="form-group">
+            <label for="organizer_id" class="label">Organizer <span class="text-danger-500" aria-hidden="true">*</span></label>
+            <select id="organizer_id"
+                    name="organizer_id"
+                    required
+                    class="input @error('organizer_id') input-error @enderror">
+                <option value="">Select an organizer</option>
+                @foreach($organizers as $organizer)
+                    <option value="{{ $organizer->id }}" {{ (string) old('organizer_id', $isEdit ? $event->organizer_id : '') === (string) $organizer->id ? 'selected' : '' }}>
+                        {{ $organizer->name }} ({{ $organizer->email }})
+                    </option>
+                @endforeach
+            </select>
+            @error('organizer_id')
+                <p class="form-error" role="alert">{{ $message }}</p>
+            @enderror
+            <p class="form-hint">Only this organizer can manage the event.</p>
+        </div>
+    @endif
 
     <!-- Title -->
     <div class="form-group">

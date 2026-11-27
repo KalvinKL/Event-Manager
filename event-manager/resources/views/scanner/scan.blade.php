@@ -86,7 +86,7 @@
                 <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Organizer</h5>
             </div>
             <div class="card-body">
-                <p class="text-muted small mb-1">Logged in as: <strong>{{ $scannerLink->organizer->name }}</strong></p>
+                <p class="text-muted small mb-1">Logged in as: <strong>{{ auth()->user()->name }}</strong></p>
                 <p class="text-muted small mb-0">Role: <span class="badge bg-warning text-dark">{{ ucfirst($scannerLink->organizer->role) }}</span></p>
             </div>
         </div>
@@ -201,26 +201,39 @@
         const noScans = document.getElementById('no-scans');
         if (noScans) noScans.remove();
 
-        const scanElement = document.createElement('div');
-        scanElement.className = 'border-bottom pb-2 mb-2 fade-in';
-        scanElement.innerHTML = `
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <strong>${registration.user.name}</strong>
-                    <br>
-                    <small class="text-muted">${registration.barcode}</small>
-                </div>
-                <span class="badge bg-success">Checked In</span>
-            </div>
-            <small class="text-muted">Just now</small>
-        `;
-        container.insertBefore(scanElement, container.firstChild);
+        container.insertBefore(createRecentScan(registration, 'Just now'), container.firstChild);
 
         // Keep only last 10 scans
         const scans = container.querySelectorAll('.border-bottom');
         if (scans.length > 10) {
             scans[scans.length - 1].remove();
         }
+    }
+
+    function createRecentScan(registration, timestamp) {
+        const scanElement = document.createElement('div');
+        scanElement.className = 'border-bottom pb-2 mb-2';
+
+        const details = document.createElement('div');
+        details.className = 'd-flex justify-content-between align-items-start';
+        const attendee = document.createElement('div');
+        const name = document.createElement('strong');
+        name.textContent = registration.user.name;
+        const barcode = document.createElement('small');
+        barcode.className = 'text-muted';
+        barcode.textContent = registration.barcode;
+        const status = document.createElement('span');
+        status.className = 'badge bg-success';
+        status.textContent = 'Checked In';
+        attendee.append(name, document.createElement('br'), barcode);
+        details.append(attendee, status);
+
+        const time = document.createElement('small');
+        time.className = 'text-muted';
+        time.textContent = timestamp;
+        scanElement.append(details, time);
+
+        return scanElement;
     }
 
     async function updateStats() {
@@ -284,20 +297,7 @@
                 if (noScans) noScans.remove();
                 
                 data.scans.forEach(scan => {
-                    const scanElement = document.createElement('div');
-                    scanElement.className = 'border-bottom pb-2 mb-2';
-                    scanElement.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <strong>${scan.user.name}</strong>
-                                <br>
-                                <small class="text-muted">${scan.barcode}</small>
-                            </div>
-                            <span class="badge bg-success">Checked In</span>
-                        </div>
-                        <small class="text-muted">${new Date(scan.checked_in_at).toLocaleString()}</small>
-                    `;
-                    container.appendChild(scanElement);
+                    container.appendChild(createRecentScan(scan, new Date(scan.checked_in_at).toLocaleString()));
                 });
             }
         } catch (error) {
