@@ -21,7 +21,7 @@
                     <button id="start-scanner" class="btn btn-primary" onclick="startScanner()">
                         <i class="bi bi-camera me-1"></i> Start Scanner
                     </button>
-                    <button id="stop-scanner" class="btn btn-secondary ms-2 d-none" onclick="stopScanner()">
+                    <button id="stop-scanner" class="btn btn-secondary ms-2" onclick="stopScanner()" hidden>
                         <i class="bi bi-camera-video-off me-1"></i> Stop Scanner
                     </button>
                 </div>
@@ -100,45 +100,84 @@
     let codeReader = null;
     let videoElement = document.getElementById('scanner-video');
     let isScanning = false;
+    let scanInProgress = false;
+    let lastDetectedBarcode = null;
 
     async function startScanner() {
+        if (isScanning) {
+            return;
+        }
+
         try {
-            codeReader = new ZXing.BrowserMultiFormatReader();
-            
-            const videoInputDevices = await codeReader.listVideoInputDevices();
+            const reader = new ZXing.BrowserMultiFormatReader();
+            const videoInputDevices = await reader.listVideoInputDevices();
             if (videoInputDevices.length === 0) {
                 alert('No camera found. Please use manual entry.');
                 return;
             }
 
-            // Prefer back camera on mobile
-            let selectedDeviceId = videoInputDevices[0].deviceId;
-            for (const device of videoInputDevices) {
-                if (device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('rear')) {
-                    selectedDeviceId = device.deviceId;
-                    break;
+            const orderedDevices = [...videoInputDevices].sort((left, right) => {
+                const priority = device => {
+                    const label = device.label.toLowerCase();
+                    if (label.includes('back') || label.includes('rear')) return 0;
+                    return label.includes('virtual') ? 2 : 1;
+                };
+
+                return priority(left) - priority(right);
+            });
+            let lastCameraError = null;
+            isScanning = true;
+
+            for (const device of orderedDevices) {
+                codeReader = new ZXing.BrowserMultiFormatReader();
+
+                try {
+                    await codeReader.decodeFromVideoDevice(device.deviceId, 'scanner-video', (result, err) => {
+                        if (result) {
+                            handleScanResult(result.getText(), true);
+                        } else if (err instanceof ZXing.NotFoundException) {
+                            lastDetectedBarcode = null;
+                        } else if (err) {
+                            console.error('Scanner error:', err);
+                        }
+                    });
+
+                    document.getElementById('scanner-status').textContent = 'Scanning...';
+                    document.getElementById('scanner-status').className = 'badge bg-warning text-dark';
+                    document.getElementById('start-scanner').hidden = true;
+                    document.getElementById('stop-scanner').hidden = false;
+                    return;
+                } catch (error) {
+                    codeReader.reset();
+                    codeReader = null;
+                    lastCameraError = error;
+
+                    if (error.name !== 'NotReadableError' && error.name !== 'NotFoundError') {
+                        throw error;
+                    }
                 }
             }
 
-            document.getElementById('scanner-status').textContent = 'Scanning...';
-            document.getElementById('scanner-status').className = 'badge bg-warning text-dark';
-            document.getElementById('start-scanner').classList.add('d-none');
-            document.getElementById('stop-scanner').classList.remove('d-none');
-            
-            isScanning = true;
-
-            await codeReader.decodeFromVideoDevice(selectedDeviceId, 'scanner-video', (result, err) => {
-                if (result) {
-                    handleScanResult(result.getText());
-                }
-                if (err && !(err instanceof ZXing.NotFoundException)) {
-                    console.error('Scanner error:', err);
-                }
-            });
+            throw lastCameraError || new Error('No available camera could be started.');
 
         } catch (error) {
             console.error('Failed to start scanner:', error);
-            alert('Failed to start camera. Please use manual entry.');
+            isScanning = false;
+            if (codeReader) {
+                codeReader.reset();
+                codeReader = null;
+            }
+            document.getElementById('scanner-status').textContent = 'Camera unavailable';
+            document.getElementById('scanner-status').className = 'badge bg-danger';
+            document.getElementById('start-scanner').hidden = false;
+            document.getElementById('stop-scanner').hidden = true;
+
+            const message = error.name === 'NotAllowedError'
+                ? 'Camera access is blocked. Allow camera access in your browser settings, or enter the barcode manually.'
+                : error.name === 'NotReadableError'
+                    ? 'All available cameras are busy. Close other apps using the camera, or enter the barcode manually.'
+                    : 'Could not start the camera. Please check camera access or enter the barcode manually.';
+            alert(message);
         }
     }
 
@@ -148,10 +187,11 @@
             codeReader = null;
         }
         isScanning = false;
+        lastDetectedBarcode = null;
         document.getElementById('scanner-status').textContent = 'Stopped';
         document.getElementById('scanner-status').className = 'badge bg-secondary';
-        document.getElementById('start-scanner').classList.remove('d-none');
-        document.getElementById('stop-scanner').classList.add('d-none');
+        document.getElementById('start-scanner').hidden = false;
+        document.getElementById('stop-scanner').hidden = true;
     }
 
     function manualScan() {
@@ -162,11 +202,21 @@
         }
     }
 
-    async function handleScanResult(barcode) {
-        if (!isScanning && !confirm('Process this barcode?')) {
+    async function handleScanResult(barcode, fromCamera = false) {
+        if (scanInProgress) {
             return;
         }
 
+        if (fromCamera) {
+            if (lastDetectedBarcode === barcode) {
+                return;
+            }
+            lastDetectedBarcode = barcode;
+        } else if (!isScanning && !confirm('Process this barcode?')) {
+            return;
+        }
+
+        scanInProgress = true;
         try {
             const response = await fetch('{{ route("scanner.scan.post", ["hash" => $scannerLink->hash]) }}', {
                 method: 'POST',
@@ -193,6 +243,8 @@
             console.error('Scan error:', error);
             showToast('danger', 'An error occurred. Please try again.');
             playErrorSound();
+        } finally {
+            scanInProgress = false;
         }
     }
 
@@ -253,25 +305,20 @@
     function showToast(type, message) {
         const toastContainer = document.getElementById('toast-container') || createToastContainer();
         const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-white bg-${type} border-0`;
-        toast.setAttribute('role', 'alert');
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
+        const isSuccess = type === 'success';
+        toast.className = `rounded-xl border px-5 py-3 shadow-lg ${isSuccess
+            ? 'border-success-200 bg-success-50 text-success-800'
+            : 'border-danger-200 bg-danger-50 text-danger-800'}`;
+        toast.setAttribute('role', isSuccess ? 'status' : 'alert');
+        toast.textContent = message;
         toastContainer.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-        bsToast.show();
-        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        setTimeout(() => toast.remove(), 3000);
     }
 
     function createToastContainer() {
         const container = document.createElement('div');
         container.id = 'toast-container';
-        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        container.style.zIndex = '9999';
+        container.className = 'fixed bottom-6 right-6 z-50 flex flex-col gap-2';
         document.body.appendChild(container);
         return container;
     }

@@ -72,7 +72,12 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Scanner link generated successfully!')
-            ->with('scanner_link', $scannerLink);
+            ->with('scanner_link', [
+                'url' => $scannerLink->getScannerUrl(),
+                'expires_at' => $scannerLink->expires_at
+                    ? $scannerLink->expires_at->toIso8601String()
+                    : null,
+            ]);
     }
 
     public function revokeScannerLink(ScannerLink $scannerLink)

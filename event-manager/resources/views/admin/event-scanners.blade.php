@@ -32,7 +32,18 @@
             </div>
         </div>
 
-        @if(session('scanner_link'))
+        @php
+            $generatedScannerLink = session('scanner_link');
+            $generatedScannerUrl = data_get($generatedScannerLink, 'url');
+            $generatedScannerHash = data_get($generatedScannerLink, 'hash');
+
+            if (! $generatedScannerUrl && $generatedScannerHash) {
+                $generatedScannerUrl = route('scanner.scan', ['hash' => $generatedScannerHash]);
+            }
+
+            $generatedScannerExpiry = data_get($generatedScannerLink, 'expires_at');
+        @endphp
+        @if($generatedScannerUrl)
             <div class="card border-success mb-4">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>Scanner Link Generated!</h5>
@@ -40,15 +51,15 @@
                 <div class="card-body">
                     <p><strong>Scanner URL:</strong></p>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control font-monospace" value="{{ session('scanner_link')->getScannerUrl() }}" readonly id="scanner-url">
+                        <input type="text" class="form-control font-monospace" value="{{ $generatedScannerUrl }}" readonly id="scanner-url">
                         <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('scanner-url')">
                             <i class="bi bi-clipboard"></i> Copy
                         </button>
                     </div>
                     <p class="text-muted small mb-0">
                         Share this link with the assigned organizer. They must sign in to scan attendee QR tickets.
-                        @if(session('scanner_link')->expires_at)
-                            <br>This link expires on {{ session('scanner_link')->expires_at->format('M d, Y g:i A') }}.
+                        @if($generatedScannerExpiry)
+                            <br>This link expires on {{ \Illuminate\Support\Carbon::parse($generatedScannerExpiry)->format('M d, Y g:i A') }}.
                         @endif
                     </p>
                 </div>

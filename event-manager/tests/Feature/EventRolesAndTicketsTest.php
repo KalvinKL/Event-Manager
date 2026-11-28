@@ -60,6 +60,7 @@ class EventRolesAndTicketsTest extends TestCase
             ->get(route('organizer.dashboard'))
             ->assertOk()
             ->assertSee($ownedEvent->title)
+            ->assertSee('Scanner link needed')
             ->assertDontSee($otherEvent->title);
 
         $this->actingAs($organizer)
@@ -96,6 +97,75 @@ class EventRolesAndTicketsTest extends TestCase
             'organizer_id' => $organizer->id,
             'title' => 'Updated event',
         ]);
+    }
+
+    public function test_organizer_dashboard_shows_attendance_analytics_and_scanner_action_for_owned_events(): void
+    {
+        $organizer = User::factory()->create(['role' => 'organizer']);
+        $otherOrganizer = User::factory()->create(['role' => 'organizer']);
+        $event = $this->createEvent($organizer);
+        $otherEvent = $this->createEvent($otherOrganizer, 'Other organizer event');
+        $attendee = User::factory()->create(['role' => 'attendee']);
+        $checkedInAttendee = User::factory()->create(['role' => 'attendee']);
+
+        Registration::create([
+            'event_id' => $event->getKey(),
+            'user_id' => $attendee->getKey(),
+            'barcode' => 'EVT-ANALYTICS123',
+            'status' => 'registered',
+        ]);
+        Registration::create([
+            'event_id' => $event->getKey(),
+            'user_id' => $checkedInAttendee->getKey(),
+            'barcode' => 'EVT-CHECKIN12345',
+            'status' => 'checked_in',
+            'checked_in_at' => now(),
+        ]);
+        Registration::create([
+            'event_id' => $otherEvent->getKey(),
+            'user_id' => User::factory()->create(['role' => 'attendee'])->getKey(),
+            'barcode' => 'EVT-OTHERANALYT',
+            'status' => 'registered',
+        ]);
+        $scannerLink = ScannerLink::create([
+            'event_id' => $event->getKey(),
+            'organizer_id' => $organizer->getKey(),
+            'hash' => 'organizer-dashboard-scanner-link',
+            'is_active' => true,
+        ]);
+
+        $filters = [
+            'event_id' => $event->getKey(),
+            'date_from' => now()->subDays(6)->toDateString(),
+            'date_to' => now()->toDateString(),
+        ];
+        $response = $this->actingAs($organizer)
+            ->get(route('organizer.dashboard', $filters + ['granularity' => 'daily']));
+
+        $response->assertOk()
+            ->assertSee('Registrations Over Time')
+            ->assertSee('Registrations vs. Check-ins')
+            ->assertSee('Scan tickets')
+            ->assertSee($scannerLink->getScannerUrl(), false)
+            ->assertDontSee($otherEvent->getAttribute('title'));
+
+        $response->assertViewHas('totalRegistered', 2)
+            ->assertViewHas('totalCheckedIn', 1)
+            ->assertViewHas('attendanceRate', 50.0)
+            ->assertViewHas('attendanceEvents', fn ($events) => $events->count() === 1
+                && $events->first()->getAttribute('registrations_count') === 2
+                && $events->first()->getAttribute('checked_in_count') === 1)
+            ->assertViewHas('registrationTrend', function (array $trend): bool {
+                return \count($trend) === 7
+                && array_sum(array_column($trend, 'registrations')) === 2;
+            });
+
+        $this->get(route('organizer.dashboard', $filters + ['granularity' => 'weekly']))
+            ->assertOk()
+            ->assertViewHas('registrationTrend', function (array $trend): bool {
+                return \count($trend) >= 1
+                && array_sum(array_column($trend, 'registrations')) === 2;
+            });
     }
 
     public function test_scanner_link_requires_the_assigned_organizer_to_be_signed_in(): void
@@ -135,6 +205,41 @@ class EventRolesAndTicketsTest extends TestCase
             'id' => $registration->id,
             'status' => 'checked_in',
         ]);
+    }
+
+    public function test_admin_scanner_page_renders_array_flash_data(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $event = $this->createEvent(User::factory()->create(['role' => 'organizer']));
+        $expiresAt = '2030-01-02 15:04:00';
+        $hash = 'array-flash-scanner-hash';
+
+        $this->actingAs($admin)
+            ->withSession(['scanner_link' => [
+                'hash' => $hash,
+                'expires_at' => $expiresAt,
+            ]])
+            ->get(route('admin.event.scanners', $event))
+            ->assertOk()
+            ->assertSee(route('scanner.scan', ['hash' => $hash]), false)
+            ->assertSee('Jan 02, 2030 3:04 PM');
+    }
+
+    public function test_generated_scanner_link_is_shown_on_the_admin_scanner_page(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $event = $this->createEvent(User::factory()->create(['role' => 'organizer']));
+
+        $this->actingAs($admin)
+            ->from(route('admin.event.scanners', $event))
+            ->post(route('admin.scanners.generate', $event))
+            ->assertRedirect(route('admin.event.scanners', $event));
+
+        $scannerLink = ScannerLink::firstOrFail();
+
+        $this->get(route('admin.event.scanners', $event))
+            ->assertOk()
+            ->assertSee($scannerLink->getScannerUrl(), false);
     }
 
     public function test_registration_confirmation_includes_a_scannable_qr_image(): void
