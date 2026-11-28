@@ -25,7 +25,7 @@
             <h2 class="text-2xl sm:text-3xl font-bold text-secondary-900 mb-3">Find Your Next Festival</h2>
             <p class="text-secondary-600 mb-6">Search by name, artist, or location</p>
 
-            <form method="GET" action="{{ route('events.index') }}" class="relative max-w-xl mx-auto">
+            <form method="GET" action="{{ route('events.index') }}" class="relative w-full max-w-2xl mx-auto">
                 <div class="relative">
                     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -34,7 +34,7 @@
                            name="search"
                            value="{{ request('search') }}"
                            placeholder="Search festivals, artists, locations..."
-                           class="input pl-12 pr-4 py-3 text-lg w-full"
+                           class="input search-input"
                            autocomplete="off">
                     @if(request('search'))
                         <a href="{{ route('events.index') }}" class="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-600" aria-label="Clear search">
@@ -58,20 +58,21 @@
 
             @php
                 $categories = [
-                    ['key' => 'music', 'label' => 'Music Festivals', 'color' => 'primary'],
-                    ['key' => 'electronic', 'label' => 'EDM & Electronic', 'color' => 'pink'],
-                    ['key' => 'rock', 'label' => 'Rock & Indie', 'color' => 'orange'],
-                    ['key' => 'cultural', 'label' => 'Cultural & Arts', 'color' => 'purple'],
-                    ['key' => 'food', 'label' => 'Food & Drink', 'color' => 'amber'],
-                    ['key' => 'comedy', 'label' => 'Comedy & Shows', 'color' => 'rose'],
-                    ['key' => 'wellness', 'label' => 'Wellness & Yoga', 'color' => 'emerald'],
-                    ['key' => 'family', 'label' => 'Family & Kids', 'color' => 'blue'],
+                    ['key' => 'music', 'label' => 'Music Festivals'],
+                    ['key' => 'electronic', 'label' => 'EDM & Electronic'],
+                    ['key' => 'rock', 'label' => 'Rock & Indie'],
+                    ['key' => 'cultural', 'label' => 'Cultural & Arts'],
+                    ['key' => 'food', 'label' => 'Food & Drink'],
+                    ['key' => 'comedy', 'label' => 'Comedy & Shows'],
+                    ['key' => 'wellness', 'label' => 'Wellness & Yoga'],
+                    ['key' => 'family', 'label' => 'Family & Kids'],
                 ];
             @endphp
 
             @foreach($categories as $cat)
                 <a href="{{ route('events.index', ['category' => $cat['key']]) }}"
-                   class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request('category') === $cat['key'] ? 'bg-'.$cat['color'].'-600 text-white shadow-lg' : 'bg-white text-secondary-600 border border-secondary-200 hover:border-'.$cat['color'].'-300 hover:text-'.$cat['color'].'-600' }}">
+                   aria-current="{{ request('category') === $cat['key'] ? 'page' : 'false' }}"
+                   class="category-pill px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 {{ request('category') === $cat['key'] ? 'bg-primary-600 text-white shadow-lg' : 'bg-white text-secondary-600 border border-secondary-200 hover:border-primary-300 hover:text-primary-600' }}">
                     {{ $cat['label'] }}
                 </a>
             @endforeach
