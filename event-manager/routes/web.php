@@ -7,6 +7,7 @@ use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ScannerController;
 use App\Models\Event;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -35,6 +36,21 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    return redirect()->intended(route('home'))
+        ->with('success', 'Your email address has been verified.');
+})->middleware(['auth', 'signed', 'throttle:6,1'])->name('verification.verify');
+
+Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware(['auth', 'throttle:6,1'])
+    ->name('verification.send');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
@@ -50,11 +66,13 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('home');
     })->name('dashboard');
 
-    Route::get('/my-registrations', [RegistrationController::class, 'myRegistrations'])->name('registrations.index');
-    Route::get('/events/{event}/register', [RegistrationController::class, 'create'])->name('registrations.create');
-    Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->name('registrations.store');
-    Route::get('/registrations/{registration}', [RegistrationController::class, 'show'])->name('registrations.show');
-    Route::delete('/registrations/{registration}', [RegistrationController::class, 'cancel'])->name('registrations.cancel');
+    Route::middleware('verified')->group(function () {
+        Route::get('/my-registrations', [RegistrationController::class, 'myRegistrations'])->name('registrations.index');
+        Route::get('/events/{event}/register', [RegistrationController::class, 'create'])->name('registrations.create');
+        Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->name('registrations.store');
+        Route::get('/registrations/{registration}', [RegistrationController::class, 'show'])->name('registrations.show');
+        Route::delete('/registrations/{registration}', [RegistrationController::class, 'cancel'])->name('registrations.cancel');
+    });
 });
 
 Route::middleware(['auth', 'organizer'])->prefix('scanner')->name('scanner.')->group(function () {

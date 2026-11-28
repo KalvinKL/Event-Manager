@@ -4,15 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Registration;
 use App\Services\RegistrationQrCodeGenerator;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class RegistrationConfirmation extends Notification implements ShouldQueue
+class RegistrationConfirmation extends Notification
 {
-    use Queueable;
-
     public function __construct(
         public Registration $registration
     ) {}

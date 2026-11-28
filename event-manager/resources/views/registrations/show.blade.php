@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.app', ['hideSidebar' => true])
 
 @section('title')
     <h1 class="h2">Registration Confirmation</h1>

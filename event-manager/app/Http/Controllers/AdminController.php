@@ -17,7 +17,9 @@ class AdminController extends Controller
             'scannerLinks',
         ])->latest()->get();
         $organizers = User::where('role', 'organizer')->get();
-        $attendeeCount = User::where('role', 'attendee')->count();
+        $attendeeCount = User::where('role', 'attendee')
+            ->whereNotNull('email_verified_at')
+            ->count();
 
         return view('admin.dashboard', compact('events', 'organizers', 'attendeeCount'));
     }
@@ -32,6 +34,7 @@ class AdminController extends Controller
         $userRole = $filters['user_role'] ?? 'all';
         $usersQuery = User::query()
             ->whereIn('role', ['organizer', 'attendee'])
+            ->whereNotNull('email_verified_at')
             ->when($userRole !== 'all', fn ($query) => $query->where('role', $userRole))
             ->when($userSearch !== '', function ($query) use ($userSearch): void {
                 $query->where(function ($query) use ($userSearch): void {
@@ -44,8 +47,12 @@ class AdminController extends Controller
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
-        $attendeeCount = User::where('role', 'attendee')->count();
-        $organizerCount = User::where('role', 'organizer')->count();
+        $attendeeCount = User::where('role', 'attendee')
+            ->whereNotNull('email_verified_at')
+            ->count();
+        $organizerCount = User::where('role', 'organizer')
+            ->whereNotNull('email_verified_at')
+            ->count();
 
         return view('admin.users', compact('users', 'userSearch', 'userRole', 'attendeeCount', 'organizerCount'));
     }

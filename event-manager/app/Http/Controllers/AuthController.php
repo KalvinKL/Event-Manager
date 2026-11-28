@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
+    private const VERIFICATION_RESEND_DELAY_SECONDS = 60;
+
     public function showLoginForm()
     {
         return view('auth.login');
@@ -54,10 +58,40 @@ class AuthController extends Controller
             'role' => 'attendee',
         ]);
 
+        event(new Registered($user));
+        RateLimiter::hit('verification-resend:'.$user->getKey(), self::VERIFICATION_RESEND_DELAY_SECONDS);
+        $request->session()->put(
+            'verification_resend_available_at',
+            now()->addSeconds(self::VERIFICATION_RESEND_DELAY_SECONDS)->timestamp
+        );
         Auth::login($user);
 
-        return redirect()->route('dashboard')
-            ->with('success', 'Registration successful! Welcome to Event Manager.');
+        return redirect()->route('verification.notice')
+            ->with('success', 'A verification link has been sent to your email address.');
+    }
+
+    public function resendVerificationEmail(Request $request)
+    {
+        $user = $request->user();
+        $rateLimitKey = 'verification-resend:'.$user->getAuthIdentifier();
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 1)) {
+            $request->session()->put(
+                'verification_resend_available_at',
+                now()->addSeconds(RateLimiter::availableIn($rateLimitKey))->timestamp
+            );
+
+            return back()->with('status', 'verification-link-cooldown');
+        }
+
+        $user->sendEmailVerificationNotification();
+        RateLimiter::hit($rateLimitKey, self::VERIFICATION_RESEND_DELAY_SECONDS);
+        $request->session()->put(
+            'verification_resend_available_at',
+            now()->addSeconds(self::VERIFICATION_RESEND_DELAY_SECONDS)->timestamp
+        );
+
+        return back()->with('status', 'verification-link-sent');
     }
 
     public function logout(Request $request)

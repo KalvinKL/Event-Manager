@@ -10,6 +10,7 @@ use App\Notifications\RegistrationConfirmation;
 use Database\Seeders\FestivalSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class EventRolesAndTicketsTest extends TestCase
@@ -272,6 +273,39 @@ class EventRolesAndTicketsTest extends TestCase
         );
     }
 
+    public function test_registration_confirmation_does_not_require_a_queue_worker(): void
+    {
+        Queue::fake();
+
+        $attendee = User::factory()->create(['role' => 'attendee']);
+        $event = $this->createEvent(User::factory()->create(['role' => 'organizer']));
+
+        $this->actingAs($attendee)
+            ->post(route('registrations.store', $event))
+            ->assertRedirect();
+
+        Queue::assertNothingPushed();
+    }
+
+    public function test_registration_confirmation_hides_admin_navigation(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $event = $this->createEvent(User::factory()->create(['role' => 'organizer']));
+        $registration = Registration::create([
+            'event_id' => $event->id,
+            'user_id' => $admin->id,
+            'barcode' => 'EVT-ADMIN123456',
+            'status' => 'registered',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('registrations.show', $registration))
+            ->assertOk()
+            ->assertDontSee('Admin Dashboard')
+            ->assertDontSee('User Management')
+            ->assertDontSee('id="sidebar"', false);
+    }
+
     public function test_admin_registration_metric_excludes_cancelled_registrations(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
@@ -390,6 +424,30 @@ class EventRolesAndTicketsTest extends TestCase
             ->assertDontSee($organizer->name)
             ->assertDontSee($protectedAdmin->name)
             ->assertSee('Admin accounts are protected.');
+    }
+
+    public function test_admin_only_sees_and_counts_attendees_after_email_verification(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $verifiedAttendee = User::factory()->create([
+            'name' => 'Verified Attendee',
+            'role' => 'attendee',
+        ]);
+        $unverifiedAttendee = User::factory()->unverified()->create([
+            'name' => 'Pending Attendee',
+            'role' => 'attendee',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertViewHas('attendeeCount', 1);
+
+        $this->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertSee($verifiedAttendee->email)
+            ->assertDontSee($unverifiedAttendee->email)
+            ->assertViewHas('attendeeCount', 1);
     }
 
     public function test_admin_cannot_change_another_admin_role(): void
