@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'PestaPora' }}</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/pestapora-mark.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-secondary-50">
@@ -19,11 +20,7 @@
             <div class="flex flex-col h-full">
                 <!-- Logo -->
                 <div class="flex items-center gap-3 px-6 py-5 border-b border-secondary-800">
-                    <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
+                    <img src="{{ asset('images/pestapora-mark.svg') }}" alt="" class="w-10 h-10 flex-shrink-0">
                     <span class="text-white font-semibold text-lg truncate">PestaPora</span>
                 </div>
 
@@ -152,6 +149,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
+                        @endif
+                        @if(!$showSidebar && !request()->routeIs('home'))
+                            <a href="{{ route('home') }}" aria-label="PestaPora home" class="flex-shrink-0">
+                                <img src="{{ asset('images/pestapora-mark.svg') }}" alt="" class="w-8 h-8">
+                            </a>
                         @endif
                         <div class="min-w-0">
                             @yield('title')

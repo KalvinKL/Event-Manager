@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="216" height="216" viewBox="12 12 216 216" fill="none" role="img" aria-labelledby="mark-title">
+  <title id="mark-title">PestaPora</title>
+  <rect x="12" y="12" width="216" height="216" rx="62" fill="#2563EB"/>
+  <path d="M75 52H165C172.18 52 178 57.82 178 65V101C164 101 164 139 178 139V175C178 182.18 172.18 188 165 188H75C67.82 188 62 182.18 62 175V139C76 139 76 101 62 101V65C62 57.82 67.82 52 75 52Z" fill="#fff"/>
+  <path d="M96 157V83H119C137 83 142 111 120 111H96" stroke="#1E3A8A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M153 78L157 89L168 93L157 97L153 108L149 97L138 93L149 89L153 78Z" fill="#FBBF24"/>
+  <path d="M146 121V165" stroke="#BFDBFE" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 9"/>
+</svg>

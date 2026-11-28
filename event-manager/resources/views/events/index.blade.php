@@ -18,7 +18,7 @@
 
 @section('content')
     <!-- Hero / Search Section -->
-    <section class="relative mb-10 animate-in bg-gradient-to-br from-primary-50 via-white to-pink-50 rounded-2xl p-6 sm:p-10 lg:p-14">
+    <section class="relative mb-10 animate-in bg-gradient-to-br from-primary-50 via-white to-primary-50 rounded-2xl p-6 sm:p-10 lg:p-14">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%233b82f6" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 
         <div class="relative max-w-3xl mx-auto text-center">
@@ -210,7 +210,7 @@
                                  alt="{{ $event->title }}"
                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         @else
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-pink-500">
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-700">
                                 <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.042 13.408a14.85 14.85 0 007.433-1.13l1.042-1.042a14.934 14.934 0 012.141 7.433l-1.042 1.042a14.85 14.85 0 00-7.433 1.13l-1.042 1.042a14.934 14.934 0 01-2.141-7.433l1.042-1.042z" />
                                 </svg>
@@ -396,7 +396,7 @@
                                  alt="{{ $event->title }}"
                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         @else
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-pink-500">
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-700">
                                 <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.042 13.408a14.85 14.85 0 007.433-1.13l1.042-1.042a14.934 14.934 0 012.141 7.433l-1.042 1.042a14.85 14.85 0 00-7.433 1.13l-1.042 1.042a14.934 14.934 0 01-2.141-7.433l1.042-1.042z" />
                                 </svg>

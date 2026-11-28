@@ -56,7 +56,7 @@
                      alt="{{ $event->title }}"
                      class="w-full h-full object-cover">
             @else
-                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-600 via-pink-600 to-orange-500">
+                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-700 via-primary-600 to-primary-700">
                     <svg class="w-24 h-24 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.042 13.408a14.85 14.85 0 007.433-1.13l1.042-1.042a14.934 14.934 0 012.141 7.433l-1.042 1.042a14.85 14.85 0 00-7.433 1.13l-1.042 1.042a14.934 14.934 0 01-2.141-7.433l1.042-1.042z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M21 12c0-1.034-.118-2.037-.337-2.997a14.976 14.976 0 00-6.41-6.41C14.037 4.118 13.034 4 12 4a14.976 14.976 0 00-7.663 1.583C4.118 7.963 4 8.966 4 10a14.976 14.976 0 001.583 7.663 14.976 14.976 0 006.41 6.41C7.963 21.882 8.966 22 10 22a14.976 14.976 0 007.663-1.583c.96-.337 1.963-.455 2.997-.337a14.5 14.5 0 00.017-.002l3.134 3.133a.75.75 0 001.061-1.06l-1.882-1.882a14.5 14.5 0 00-.002-.017z" />
@@ -340,7 +340,7 @@
                          alt="{{ $event->title }}"
                          class="w-full h-40 object-cover">
                 @else
-                    <div class="w-full h-40 bg-gradient-to-br from-primary-600 to-pink-600 flex items-center justify-center">
+                    <div class="w-full h-40 bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center">
                         <svg class="w-12 h-12 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.042 13.408a14.85 14.85 0 007.433-1.13l1.042-1.042a14.934 14.934 0 012.141 7.433l-1.042 1.042a14.85 14.85 0 00-7.433 1.13l-1.042 1.042a14.934 14.934 0 01-2.141-7.433l1.042-1.042z" />
                         </svg>

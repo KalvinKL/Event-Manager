@@ -37,6 +37,8 @@ class EmailVerificationTest extends TestCase
                 && str_contains($renderedMail, 'Verifikasi alamat email Anda')
                 && str_contains($renderedMail, $user->name)
                 && str_contains($renderedMail, 'Verifikasi Email')
+                && str_contains($renderedMail, 'PestaPora')
+                && !str_contains($renderedMail, 'Laravel')
                 && str_contains($renderedMail, '60 menit');
         });
 

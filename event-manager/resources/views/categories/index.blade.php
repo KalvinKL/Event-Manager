@@ -36,13 +36,13 @@
                         @php
                             $categories = [
                                 ['key' => 'music', 'label' => 'Music Festivals', 'icon' => 'music', 'color' => 'primary'],
-                                ['key' => 'electronic', 'label' => 'EDM & Electronic', 'icon' => 'electronic', 'color' => 'pink'],
-                                ['key' => 'rock', 'label' => 'Rock & Indie', 'icon' => 'rock', 'color' => 'orange'],
-                                ['key' => 'cultural', 'label' => 'Cultural & Arts', 'icon' => 'cultural', 'color' => 'purple'],
-                                ['key' => 'food', 'label' => 'Food & Drink', 'icon' => 'food', 'color' => 'amber'],
-                                ['key' => 'comedy', 'label' => 'Comedy & Shows', 'icon' => 'comedy', 'color' => 'rose'],
-                                ['key' => 'wellness', 'label' => 'Wellness & Yoga', 'icon' => 'wellness', 'color' => 'emerald'],
-                                ['key' => 'family', 'label' => 'Family & Kids', 'icon' => 'family', 'color' => 'blue'],
+                                ['key' => 'electronic', 'label' => 'EDM & Electronic', 'icon' => 'electronic', 'color' => 'primary'],
+                                ['key' => 'rock', 'label' => 'Rock & Indie', 'icon' => 'rock', 'color' => 'primary'],
+                                ['key' => 'cultural', 'label' => 'Cultural & Arts', 'icon' => 'cultural', 'color' => 'primary'],
+                                ['key' => 'food', 'label' => 'Food & Drink', 'icon' => 'food', 'color' => 'primary'],
+                                ['key' => 'comedy', 'label' => 'Comedy & Shows', 'icon' => 'comedy', 'color' => 'primary'],
+                                ['key' => 'wellness', 'label' => 'Wellness & Yoga', 'icon' => 'wellness', 'color' => 'primary'],
+                                ['key' => 'family', 'label' => 'Family & Kids', 'icon' => 'family', 'color' => 'primary'],
                             ];
                         @endphp
                         @foreach($categories as $cat)
@@ -82,7 +82,7 @@
             <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-primary-50 font-medium transition-colors">
                 Sign In
             </a>
-            <a href="{{ route('register') }}" class="px-5 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-pink-600 text-white font-semibold hover:from-primary-700 hover:to-pink-700 transition-all duration-200 flex items-center gap-2">
+            <a href="{{ route('register') }}" class="px-5 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-200 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
@@ -113,7 +113,7 @@
 
 @section('content')
     <!-- Hero Section -->
-    <section class="relative overflow-hidden animate-in bg-gradient-to-br from-primary-50 via-white to-pink-50">
+    <section class="relative overflow-hidden animate-in bg-gradient-to-br from-primary-50 via-white to-primary-50">
         <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%233b82f6" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 
         <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32 text-center">
@@ -126,7 +126,7 @@
             </div>
 
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-secondary-900 tracking-tight mb-6 animate-in" style="animation-delay: 0.2s;">
-                Discover Festivals by <span class="bg-gradient-to-r from-primary-600 to-pink-600 bg-clip-text text-transparent">Category</span>
+                Discover Festivals by <span class="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Category</span>
             </h1>
 
             <p class="text-lg sm:text-xl text-secondary-600 max-w-2xl mx-auto mb-10 animate-in" style="animation-delay: 0.3s;">
@@ -168,8 +168,8 @@
                             'label' => 'EDM & Electronic',
                             'description' => 'High-energy electronic dance music festivals with world-class DJs, lasers, and immersive productions.',
                             'icon' => 'electronic',
-                            'color' => 'pink',
-                            'bg' => 'from-pink-500 to-rose-500',
+                            'color' => 'primary',
+                            'bg' => 'from-primary-500 to-primary-700',
                             'stats' => ['42+ festivals', '1.8M+ attendees'],
                             'popular' => ['DWP', 'Ultra Bali', 'Electric Castle'],
                         ],
@@ -178,8 +178,8 @@
                             'label' => 'Rock & Indie',
                             'description' => 'Rock, alternative, and indie music festivals featuring both legendary acts and emerging artists.',
                             'icon' => 'rock',
-                            'color' => 'orange',
-                            'bg' => 'from-orange-500 to-amber-500',
+                            'color' => 'primary',
+                            'bg' => 'from-primary-600 to-primary-700',
                             'stats' => ['38+ festivals', '900K+ attendees'],
                             'popular' => ['Rock in Java', 'Hammersonic', 'Soundrenaline'],
                         ],
@@ -188,8 +188,8 @@
                             'label' => 'Cultural & Arts',
                             'description' => 'Traditional arts, dance, theater, and cultural heritage festivals celebrating Indonesian diversity.',
                             'icon' => 'cultural',
-                            'color' => 'purple',
-                            'bg' => 'from-purple-500 to-violet-500',
+                            'color' => 'primary',
+                            'bg' => 'from-primary-600 to-primary-800',
                             'stats' => ['25+ festivals', '500K+ attendees'],
                             'popular' => ['Bali Arts Festival', 'Solo Batik', 'Erau Festival'],
                         ],
@@ -198,8 +198,8 @@
                             'label' => 'Food & Drink',
                             'description' => 'Culinary festivals showcasing street food, fine dining, coffee culture, and local delicacies.',
                             'icon' => 'food',
-                            'color' => 'amber',
-                            'bg' => 'from-amber-500 to-yellow-500',
+                            'color' => 'primary',
+                            'bg' => 'from-primary-400 to-primary-600',
                             'stats' => ['18+ festivals', '300K+ attendees'],
                             'popular' => ['Jakarta Food Fest', 'Ubud Food Festival', 'Makassar Culinary'],
                         ],
@@ -208,8 +208,8 @@
                             'label' => 'Comedy & Shows',
                             'description' => 'Stand-up comedy, improv, theater, and entertainment shows for laughter-filled evenings.',
                             'icon' => 'comedy',
-                            'color' => 'rose',
-                            'bg' => 'from-rose-500 to-pink-500',
+                            'color' => 'primary',
+                            'bg' => 'from-primary-600 to-primary-800',
                             'stats' => ['12+ festivals', '150K+ attendees'],
                             'popular' => ['Comedy Festival', 'Stand Up Indonesia', 'Improv Comedy'],
                         ],
@@ -218,8 +218,8 @@
                             'label' => 'Wellness & Yoga',
                             'description' => 'Yoga retreats, meditation, sound healing, and holistic wellness festivals for mind and body.',
                             'icon' => 'wellness',
-                            'color' => 'emerald',
-                            'bg' => 'from-emerald-500 to-teal-500',
+                            'color' => 'primary',
+                            'bg' => 'from-primary-500 to-primary-700',
                             'stats' => ['15+ festivals', '200K+ attendees'],
                             'popular' => ['Bali Spirit Fest', 'Yoga Barn Retreat', 'Wellness Weekend'],
                         ],
@@ -229,7 +229,7 @@
                             'description' => 'Kid-friendly festivals with activities, workshops, performances, and entertainment for all ages.',
                             'icon' => 'family',
                             'color' => 'blue',
-                            'bg' => 'from-blue-500 to-cyan-500',
+                            'bg' => 'from-primary-400 to-primary-700',
                             'stats' => ['22+ festivals', '400K+ attendees'],
                             'popular' => ['Kids Fair', 'Family Weekend', 'Children Festival'],
                         ],
@@ -314,7 +314,7 @@
     <!-- CTA Section -->
     <section class="py-16 sm:py-20 lg:py-24 animate-in" style="animation-delay: 0.8s;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="card overflow-hidden bg-gradient-to-r from-primary-600 via-pink-600 to-orange-500">
+            <div class="card overflow-hidden bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700">
                 <div class="p-8 sm:p-12 lg:p-16 text-center">
                     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 

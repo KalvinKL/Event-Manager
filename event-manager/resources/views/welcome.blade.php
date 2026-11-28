@@ -1,7 +1,9 @@
 @extends('layouts.app', ['hideSidebar' => true])
 
 @section('title')
-    <h1 class="page-title">PestaPora</h1>
+    <a href="{{ route('home') }}" aria-label="PestaPora">
+        <img src="{{ asset('images/pestapora-logo.svg') }}" alt="PestaPora" class="h-12 w-auto">
+    </a>
     <p class="page-subtitle">Discover Amazing Music Festivals & Entertainment Events</p>
 @endsection
 
@@ -40,13 +42,13 @@
                         @php
                             $categories = [
                                 ['key' => 'music', 'label' => 'Music Festivals', 'icon' => 'music', 'color' => 'primary'],
-                                ['key' => 'electronic', 'label' => 'EDM & Electronic', 'icon' => 'electronic', 'color' => 'pink'],
-                                ['key' => 'rock', 'label' => 'Rock & Indie', 'icon' => 'rock', 'color' => 'orange'],
-                                ['key' => 'cultural', 'label' => 'Cultural & Arts', 'icon' => 'cultural', 'color' => 'purple'],
-                                ['key' => 'food', 'label' => 'Food & Drink', 'icon' => 'food', 'color' => 'amber'],
-                                ['key' => 'comedy', 'label' => 'Comedy & Shows', 'icon' => 'comedy', 'color' => 'rose'],
-                                ['key' => 'wellness', 'label' => 'Wellness & Yoga', 'icon' => 'wellness', 'color' => 'emerald'],
-                                ['key' => 'family', 'label' => 'Family & Kids', 'icon' => 'family', 'color' => 'blue'],
+                                ['key' => 'electronic', 'label' => 'EDM & Electronic', 'icon' => 'electronic', 'color' => 'primary'],
+                                ['key' => 'rock', 'label' => 'Rock & Indie', 'icon' => 'rock', 'color' => 'primary'],
+                                ['key' => 'cultural', 'label' => 'Cultural & Arts', 'icon' => 'cultural', 'color' => 'primary'],
+                                ['key' => 'food', 'label' => 'Food & Drink', 'icon' => 'food', 'color' => 'primary'],
+                                ['key' => 'comedy', 'label' => 'Comedy & Shows', 'icon' => 'comedy', 'color' => 'primary'],
+                                ['key' => 'wellness', 'label' => 'Wellness & Yoga', 'icon' => 'wellness', 'color' => 'primary'],
+                                ['key' => 'family', 'label' => 'Family & Kids', 'icon' => 'family', 'color' => 'primary'],
                             ];
                         @endphp
                         @foreach($categories as $cat)
@@ -104,7 +106,7 @@
                 <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg text-secondary-600 hover:text-primary-600 hover:bg-primary-50 font-medium transition-colors">
                     Sign In
                 </a>
-                <a href="{{ route('register') }}" class="px-5 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-pink-600 text-white font-semibold hover:from-primary-700 hover:to-pink-700 transition-all duration-200 flex items-center gap-2">
+                <a href="{{ route('register') }}" class="px-5 py-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold hover:from-primary-700 hover:to-primary-800 transition-all duration-200 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
@@ -151,7 +153,7 @@
 @section('content')
     <!-- Hero Section -->
     <section class="relative overflow-hidden animate-in">
-        <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary-600/10 via-transparent to-pink-600/10"></div>
+        <div class="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary-600/10 via-transparent to-primary-600/10"></div>
         <div class="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%233b82f6" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 
         <div class="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 lg:py-32 text-center">
@@ -165,7 +167,7 @@
             </div>
 
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-secondary-900 tracking-tight mb-6 animate-in" style="animation-delay: 0.2s;">
-                Discover <span class="bg-gradient-to-r from-primary-600 to-pink-600 bg-clip-text text-transparent">Music Festivals</span> & <span class="bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">Entertainment</span>
+                Discover <span class="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Music Festivals</span> & <span class="bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">Entertainment</span>
             </h1>
 
             <p class="text-lg sm:text-xl text-secondary-600 max-w-2xl mx-auto mb-10 animate-in" style="animation-delay: 0.3s;">
@@ -180,7 +182,7 @@
                     Explore Festivals
                 </a>
                 @guest
-                <a href="{{ route('register') }}" class="btn btn-outline btn-lg w-full sm:w-auto border-pink-300 text-pink-600 hover:bg-pink-50">
+                <a href="{{ route('register') }}" class="btn btn-outline btn-lg w-full sm:w-auto border-primary-300 text-primary-700 hover:bg-primary-50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
@@ -188,7 +190,7 @@
                 </a>
                 @else
                     @if(Auth::user()->isAttendee())
-                    <a href="{{ route('registrations.index') }}" class="btn btn-outline btn-lg w-full sm:w-auto border-pink-300 text-pink-600 hover:bg-pink-50">
+                    <a href="{{ route('registrations.index') }}" class="btn btn-outline btn-lg w-full sm:w-auto border-primary-300 text-primary-700 hover:bg-primary-50">
                         My Registrations
                     </a>
                     @endif
@@ -205,14 +207,14 @@
                     <span class="text-sm">Festivals</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                     </svg>
                     <span class="text-sm font-medium text-secondary-700">150K+</span>
                     <span class="text-sm">Attendees</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span class="text-sm font-medium text-secondary-700">50+</span>
@@ -247,7 +249,7 @@
                                      alt="{{ $event->title }}"
                                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                             @else
-                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-pink-500">
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-600 to-primary-700">
                                     <svg class="w-16 h-16 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.042 13.408a14.85 14.85 0 007.433-1.13l1.042-1.042a14.934 14.934 0 012.141 7.433l-1.042 1.042a14.85 14.85 0 00-7.433 1.13l-1.042 1.042a14.934 14.934 0 01-2.141-7.433l1.042-1.042z" />
                                     </svg>
@@ -334,13 +336,13 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 @foreach([
                     ['icon' => 'music', 'label' => 'Music Festivals', 'color' => 'primary', 'count' => '85'],
-                    ['icon' => 'electronic', 'label' => 'EDM & Electronic', 'color' => 'pink', 'count' => '42'],
-                    ['icon' => 'rock', 'label' => 'Rock & Indie', 'color' => 'orange', 'count' => '38'],
-                    ['icon' => 'cultural', 'label' => 'Cultural & Arts', 'color' => 'purple', 'count' => '25'],
-                    ['icon' => 'food', 'label' => 'Food & Drink', 'color' => 'amber', 'count' => '18'],
-                    ['icon' => 'comedy', 'label' => 'Comedy & Shows', 'color' => 'rose', 'count' => '12'],
-                    ['icon' => 'wellness', 'label' => 'Wellness & Yoga', 'color' => 'emerald', 'count' => '15'],
-                    ['icon' => 'family', 'label' => 'Family & Kids', 'color' => 'blue', 'count' => '22'],
+                    ['icon' => 'electronic', 'label' => 'EDM & Electronic', 'color' => 'primary', 'count' => '42'],
+                    ['icon' => 'rock', 'label' => 'Rock & Indie', 'color' => 'primary', 'count' => '38'],
+                    ['icon' => 'cultural', 'label' => 'Cultural & Arts', 'color' => 'primary', 'count' => '25'],
+                    ['icon' => 'food', 'label' => 'Food & Drink', 'color' => 'primary', 'count' => '18'],
+                    ['icon' => 'comedy', 'label' => 'Comedy & Shows', 'color' => 'primary', 'count' => '12'],
+                    ['icon' => 'wellness', 'label' => 'Wellness & Yoga', 'color' => 'primary', 'count' => '15'],
+                    ['icon' => 'family', 'label' => 'Family & Kids', 'color' => 'primary', 'count' => '22'],
                 ] as $cat)
                     <a href="{{ route('events.index') }}?category={{ Str::slug($cat['label']) }}"
                        class="card p-6 text-center hover:shadow-lg hover:border-{{ $cat['color'] }}-300 transition-all group">
@@ -389,7 +391,7 @@
                             Browse Festivals
                         </a>
                         @guest
-                            <a href="{{ route('register') }}" class="btn btn-outline border-pink-300 text-pink-600 hover:bg-pink-50">
+                            <a href="{{ route('register') }}" class="btn btn-outline border-primary-300 text-primary-700 hover:bg-primary-50">
                                 Create Free Account
                             </a>
                         @endguest
@@ -398,19 +400,19 @@
 
                 <div class="grid grid-cols-2 gap-6">
                     <div class="card p-6 text-center">
-                        <div class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-pink-600 bg-clip-text text-transparent">200+</div>
+                        <div class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">200+</div>
                         <p class="text-secondary-500 mt-1">Festivals Listed</p>
                     </div>
                     <div class="card p-6 text-center">
-                        <div class="text-4xl font-bold bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">150K+</div>
+                        <div class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">150K+</div>
                         <p class="text-secondary-500 mt-1">Happy Attendees</p>
                     </div>
                     <div class="card p-6 text-center">
-                        <div class="text-4xl font-bold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">50+</div>
+                        <div class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">50+</div>
                         <p class="text-secondary-500 mt-1">Cities Covered</p>
                     </div>
                     <div class="card p-6 text-center">
-                        <div class="text-4xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">99%</div>
+                        <div class="text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text text-transparent">99%</div>
                         <p class="text-secondary-500 mt-1">Satisfaction Rate</p>
                     </div>
                 </div>
@@ -421,7 +423,7 @@
     <!-- CTA Section -->
     <section class="py-16 sm:py-20 lg:py-24 animate-in" style="animation-delay: 0.9s;">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="card overflow-hidden bg-gradient-to-r from-primary-600 via-pink-600 to-orange-500">
+            <div class="card overflow-hidden bg-gradient-to-r from-primary-700 via-primary-600 to-primary-700">
                 <div class="p-8 sm:p-12 lg:p-16 text-center">
                     <div class="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 36v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 6V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
 

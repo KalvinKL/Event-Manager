@@ -18,7 +18,7 @@
     <div class="max-w-md mx-auto animate-in">
         <div class="card">
             <div class="card-header text-center">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-pink-600 flex items-center justify-center mx-auto mb-4">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.042 13.408a14.85 14.85 0 007.433-1.13l1.042-1.042a14.934 14.934 0 012.141 7.433l-1.042 1.042a14.85 14.85 0 00-7.433 1.13l-1.042 1.042a14.934 14.934 0 01-2.141-7.433l1.042-1.042z" />
                     </svg>
